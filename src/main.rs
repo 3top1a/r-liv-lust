@@ -17,7 +17,7 @@ main() {
 	println!("{:?}", args);
 
 	// Create window and main loop
-	ui:: create_window();
+	ui:: window();
 
 	// Exit
 	std::process::exit(0)

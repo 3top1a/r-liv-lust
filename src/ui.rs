@@ -4,52 +4,60 @@ extern crate imgui_glium_renderer;
 
 use glium::*;
 
-/*fn
-refresh_mouse()
-{
-	let mut mouse_pos = (0, 0);
-	let mut mouse_pressed = (false, false, false);
-	let mut mouse_wheel = 0.0;
+struct WindowData {
+	// OpenGl
 
-	imgui_io.mouse_pos = [mouse_pos.0 as f32 / width as f32, mouse_pos.1 as f32 / height as f32];
-	//imgui_io.set_mouse_down(&[mouse_pressed.0, mouse_pressed.1, mouse_pressed.2, false, false]);
-	//imgui_io.set_mouse_wheel(mouse_wheel / scale.1);
-	mouse_wheel = 0.0;
-}*/
+	gl_event_loop: glutin::event_loop::EventLoop<()>,
+	gl_window_builder: glutin::window::WindowBuilder,
+	gl_display: glium::Display,
 
-pub fn
+	// ImGui
+	im_builder: imgui::Context,
+	im_renderer: imgui_glium_renderer::Renderer,
+}
+
+fn
 create_window()
+-> WindowData
 {
-	//* Init
-
 	// Create OpenGL window
 	let event_loop = glutin::event_loop::EventLoop::new();
-	let wb = glutin::window::WindowBuilder::new()
+	let window_builder = glutin::window::WindowBuilder::new()
 		.with_title("Asd")
 		.with_decorations(false)
 		.with_inner_size(glutin::dpi::LogicalSize::new(1024f64, 768f64));
 
-	let cb = glutin::ContextBuilder::new()
+	let context_builder = glutin::ContextBuilder::new()
 		.with_vsync(false)
 		.with_hardware_acceleration(Some(true))
 		.with_multisampling(2);
 
-	let display = glium::Display::new(wb, cb, &event_loop).unwrap();
+	let display = glium::Display::new(window_builder, context_builder, &event_loop).unwrap();
 
 	// Create ImGui
-	let mut imgui_b = imgui::Context::create();
-	imgui_b.set_ini_filename(None);
-	let mut renderer = imgui_glium_renderer::Renderer::init(&mut imgui_b, &display).unwrap();
-	imgui_b.style_mut()
-		.use_dark_colors();
-	imgui_b.style_mut();
+	let mut imgui_builder = imgui::Context::create();
+	imgui_builder.set_ini_filename(None);
+	imgui_builder.style_mut()
+	.use_dark_colors();
+	imgui_builder.style_mut();
 
-	//* Loop
+	let mut imgui_renderer = imgui_glium_renderer::Renderer::init(&mut imgui_builder, &display).unwrap();
 
-	event_loop.run(move |event, _, control_flow| {
-		// *Events
+	WindowData {	
+		gl_event_loop: event_loop,
+		gl_window_builder: window_builder,
+		gl_display: display,
+		im_builder: imgui_builder,
+		im_renderer: imgui_renderer
+	}
+}
 
-		let event_ref = &event;
+fn
+window_loop(wdata: WindowData)
+{
+	let data = wdata;
+
+	data.gl_event_loop.run(move |event, _, control_flow| {
 		
 		// Close
 		if let glutin::event::Event::WindowEvent { event, .. } = event_ref {
@@ -72,16 +80,16 @@ create_window()
 		// *Render
 
 		// Create render target
-		let mut target = display.draw();
+		let mut target = data.gl_display.draw();
 
 		// Background
 		target.clear_color(0.05, 0.05, 0.05, 1.0);
-		
+
 		// ImGui IO
-		let imgui_io = imgui_b.io_mut();
+		let imgui_io = data.im_builder.io_mut();
 
 		// Set display dimentions
-		let (width, height) = display.get_framebuffer_dimensions();
+		let (width, height) = data.gl_display.get_framebuffer_dimensions();
 		imgui_io.display_size = [width as f32, height as f32];
 		
 		// Set mouse stuff
@@ -113,7 +121,7 @@ create_window()
 		}
 
 		// Make a frame
-		let ui = imgui_b.frame();
+		let ui = data.im_builder.frame();
 
 		// Add a test window
 		imgui::Window::new(imgui::im_str!("Hello world"))
@@ -125,9 +133,19 @@ create_window()
 			});
 
 		// Render that ImGui frame to target
-		renderer.render(&mut target, ui.render()).unwrap();
+		data.im_renderer.render(&mut target, ui.render()).unwrap();
 
 		target.finish().unwrap();
 	});
+}
 
+
+pub fn
+window()
+{
+	//* Init
+	let data = create_window();
+
+	//* Loop
+	window_loop(data);
 }
