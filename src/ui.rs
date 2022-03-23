@@ -84,6 +84,8 @@ window_loop( mut data: WindowData )
 			target.clear_color(0.05, 0.05, 0.05, 1.0);
 			
 			// ImGui IO
+			let framerate = data.im_builder.io().framerate;
+			let delta = data.im_builder.io().delta_time;
 			let mut imgui_io = data.im_builder.io_mut();
 			
 			// Set display dimentions
@@ -104,8 +106,11 @@ window_loop( mut data: WindowData )
 				ui.separator();
 			});
 			imgui::Window::new(imgui::im_str!("Debug"))
-			.size([350.0, 60.0], imgui::Condition::FirstUseEver)
-			.position([(width / 2) as f32, 10.0], imgui::Condition::Always)
+			.size([350.0, 100.0], imgui::Condition::FirstUseEver)
+			.position([
+				(width as f32 / 2f32) - (350.0 / 2.0),
+				10.0
+				], imgui::Condition::Always)
 			.bg_alpha(0.25)
 			.scrollable(false)
 			.collapsible(false)
@@ -114,10 +119,12 @@ window_loop( mut data: WindowData )
 			.scroll_bar(false)
 			.resizable(false)
 			.build(&ui, || {
-				ui.text("--- Debug menu ---");
+				ui.text("Debug menu");
 				ui.separator();
 				ui.text( format!("Free VRAM: {}KB", data.gl_display.get_free_video_memory().unwrap_or(usize::MIN)));
-				//ui.text( format!("Reported FPS: {}", &imgui_io.framerate  ))
+				ui.text( format!("Reported FPS: {}", framerate));
+				ui.text( format!("Delta: {}", delta));
+				ui.text( format!("Calculated FPS: {}", 1.0 / delta));
 			});
 			
 			// Render that ImGui frame to target
