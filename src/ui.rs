@@ -8,7 +8,6 @@ struct WindowData {
 	// OpenGl
 
 	gl_event_loop: glutin::event_loop::EventLoop<()>,
-	gl_window_builder: glutin::window::WindowBuilder,
 	gl_display: glium::Display,
 
 	// ImGui
@@ -41,11 +40,10 @@ create_window()
 	.use_dark_colors();
 	imgui_builder.style_mut();
 
-	let mut imgui_renderer = imgui_glium_renderer::Renderer::init(&mut imgui_builder, &display).unwrap();
+	let imgui_renderer = imgui_glium_renderer::Renderer::init(&mut imgui_builder, &display).unwrap();
 
-	WindowData {	
+	WindowData {
 		gl_event_loop: event_loop,
-		gl_window_builder: window_builder,
 		gl_display: display,
 		im_builder: imgui_builder,
 		im_renderer: imgui_renderer
@@ -53,12 +51,13 @@ create_window()
 }
 
 fn
-window_loop(wdata: WindowData)
+window_loop( mut data: WindowData )
 {
-	let data = wdata;
+	//let mut data = wdata;
 
 	data.gl_event_loop.run(move |event, _, control_flow| {
-		
+		let event_ref = &event;
+
 		// Close
 		if let glutin::event::Event::WindowEvent { event, .. } = event_ref {
             match event {
@@ -86,7 +85,7 @@ window_loop(wdata: WindowData)
 		target.clear_color(0.05, 0.05, 0.05, 1.0);
 
 		// ImGui IO
-		let imgui_io = data.im_builder.io_mut();
+		let mut imgui_io = data.im_builder.io_mut();
 
 		// Set display dimentions
 		let (width, height) = data.gl_display.get_framebuffer_dimensions();
@@ -103,7 +102,7 @@ window_loop(wdata: WindowData)
 				}
 				glutin::event::WindowEvent::MouseInput { device_id, state, button, modifiers } =>
 				{
-					// TODO Better mouse detection
+					// TODO Better mouse input
 					// This is really jank and is only for M1
 					if button == &glutin::event::MouseButton::Left
 					{
