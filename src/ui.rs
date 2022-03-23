@@ -145,17 +145,42 @@ window_loop( mut data: WindowData )
 				}
 				glutin::event::WindowEvent::MouseInput { state, button, ..} =>
 				{
-					// TODO Better mouse input
-					// This is really jank and is only for M1
-					if button == &glutin::event::MouseButton::Left
+					let mut s = false;
+					if state == &glutin::event::ElementState::Pressed
 					{
-						let mut s = false;
-						if state == &glutin::event::ElementState::Pressed
-						{
-							s = true;
+						s = true;
+					}
+					
+					
+					match button {
+						glutin::event::MouseButton::Left => {
+							imgui_io.mouse_down = [
+								s,
+								imgui_io.mouse_down[1],
+								imgui_io.mouse_down[2],
+								imgui_io.mouse_down[3],
+								imgui_io.mouse_down[4]
+							];
 						}
-						
-						imgui_io.mouse_down = [ s , false, false, false, false ]
+						glutin::event::MouseButton::Right => {
+							imgui_io.mouse_down = [
+								imgui_io.mouse_down[0],
+								s,
+								imgui_io.mouse_down[2],
+								imgui_io.mouse_down[3],
+								imgui_io.mouse_down[4]
+							];
+						}
+						glutin::event::MouseButton::Middle => {
+							imgui_io.mouse_down = [
+								imgui_io.mouse_down[0],
+								imgui_io.mouse_down[1],
+								s,
+								imgui_io.mouse_down[3],
+								imgui_io.mouse_down[4]
+							];
+						}
+						_ => ()
 					}
 				}
 				_ => (

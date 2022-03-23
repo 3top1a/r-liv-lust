@@ -14,7 +14,6 @@ main() {
 		eprintln!("No images selected!");
 		std::process::exit(1)
 	}
-	println!("{:?}", args);
 
 	// Create window and main loop
 	ui:: window();
