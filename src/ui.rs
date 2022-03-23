@@ -121,7 +121,7 @@ window_loop( mut data: WindowData )
 			.build(&ui, || {
 				ui.text("Debug menu");
 				ui.separator();
-				ui.text( format!("Free VRAM: {}KB", data.gl_display.get_free_video_memory().unwrap_or(usize::MIN)));
+				ui.text( format!("Free VRAM: {}MB", data.gl_display.get_free_video_memory().unwrap_or(usize::MIN) / 1_000_000));
 				ui.text( format!("Reported FPS: {}", framerate));
 				ui.text( format!("Delta: {}", delta));
 				ui.text( format!("Calculated FPS: {}", 1.0 / delta));
