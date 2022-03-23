@@ -151,7 +151,9 @@ window_loop( mut data: WindowData )
 						imgui_io.mouse_down = [ s , false, false, false, false ]
 					}
 				}
-				_ => ()
+				_ => (
+					data.gl_display.gl_window().window().request_redraw()
+				)
 			}
 		}
 		std::mem::drop(imgui_io);
