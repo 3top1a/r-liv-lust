@@ -6,7 +6,6 @@ use glium::*;
 
 struct WindowData {
 	// OpenGl
-	
 	gl_event_loop: glutin::event_loop::EventLoop<()>,
 	gl_display: glium::Display,
 	
@@ -19,12 +18,15 @@ fn
 create_window()
 -> WindowData
 {
+	let width = 1024;
+	let height = 768;
+
 	// Create OpenGL window
 	let event_loop = glutin::event_loop::EventLoop::new();
 	let window_builder = glutin::window::WindowBuilder::new()
 		.with_title("Asd")
 		.with_decorations(false)
-		.with_inner_size(glutin::dpi::LogicalSize::new(1024f64, 768f64));
+		.with_inner_size(glutin::dpi::LogicalSize::new(width, height));
 	
 	let context_builder = glutin::ContextBuilder::new()
 		.with_vsync(false)
@@ -35,10 +37,12 @@ create_window()
 	
 	// Create ImGui
 	let mut imgui_builder = imgui::Context::create();
+
+	// Theme
 	imgui_builder.set_ini_filename(None);
-	imgui_builder.style_mut()
-	.use_dark_colors();
-	imgui_builder.style_mut();
+	imgui_builder.style_mut().use_dark_colors();
+	imgui_builder.style_mut().window_rounding = 0.0;
+	imgui_builder.style_mut().window_border_size = 1.0;
 	
 	let imgui_renderer = imgui_glium_renderer::Renderer::init(&mut imgui_builder, &display).unwrap();
 	
