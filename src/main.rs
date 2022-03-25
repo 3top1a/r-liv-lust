@@ -3,7 +3,7 @@ mod ui;
 fn
 main() {
 	// Debug
-	println!("--- R-liv v? ---");
+	println!("--- R-liv v{} ---", std::env!("CARGO_PKG_VERSION"));
 	println!("ImGui v{}", imgui::dear_imgui_version() );
 
 	// Argument parsing
@@ -14,7 +14,6 @@ main() {
 		eprintln!("No images selected!");
 		std::process::exit(1)
 	}
-	println!("{:?}", args);
 
 	// Create window and main loop
 	ui:: window();
