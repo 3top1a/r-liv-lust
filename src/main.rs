@@ -16,7 +16,7 @@ main() {
 	}
 
 	// Create window and main loop
-	ui:: window();
+	ui::window();
 
 	// Exit
 	std::process::exit(0)

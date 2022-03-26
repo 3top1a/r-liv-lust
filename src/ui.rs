@@ -109,6 +109,8 @@ window_loop( mut data: WindowData )
 				ui.button(imgui::im_str!("Test"), [60.0, 20.0]);
 				ui.separator();
 			});
+
+			// Add the debug window
 			imgui::Window::new(imgui::im_str!("Debug"))
 			.size([350.0, 100.0], imgui::Condition::FirstUseEver)
 			.position([
