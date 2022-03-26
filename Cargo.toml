@@ -16,3 +16,4 @@ panic = 'abort'
 glium = "0.29.0"
 imgui = "0.7.0"
 imgui-glium-renderer = "0.7.0"
+image = "0.24.1"

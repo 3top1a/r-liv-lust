@@ -1,8 +1,19 @@
 extern crate glium;
 extern crate imgui;
 extern crate imgui_glium_renderer;
+extern crate image;
 
 use glium::*;
+
+use std::io::Cursor;
+
+#[derive(Copy, Clone)]
+struct Vertex {
+    position: [f32; 2],
+	tex_coords: [f32; 2],       // <- this is new
+}
+
+implement_vertex!(Vertex, position, tex_coords);
 
 struct WindowData {
 	// OpenGl
@@ -132,7 +143,80 @@ window_loop( mut data: WindowData )
 				ui.text( format!("Delta: {}", delta));
 				ui.text( format!("Calculated FPS: {}", 1.0 / delta));
 			});
+
+			// Triangle
+			let vertex_buffer = {
+
+				glium::VertexBuffer::new(
+					&data.gl_display,
+					&[
+						Vertex {
+							position: [0.0, 0.0],
+							tex_coords: [0.0, 0.0],
+						},
+						Vertex {
+							position: [0.0, 1.0],
+							tex_coords: [0.0, 1.0],
+						},
+						Vertex {
+							position: [1.0, 1.0],
+							tex_coords: [1.0, 1.0],
+						},
+						Vertex {
+							position: [1.0, 0.0],
+							tex_coords: [1.0, 0.0],
+						},
+					],
+				).unwrap()
+			};
+			let index_buffer =
+            glium::IndexBuffer::new(&data.gl_display, glium::index::PrimitiveType::TriangleStrip, &[1 as u16, 2, 0, 3])
+                .unwrap();
+
+			// Image
+			let image = image::load(Cursor::new(&include_bytes!("../logo.png")),
+			image::ImageFormat::Png).unwrap().to_rgba8();
+			let image_dimensions = image.dimensions();
+			let image = glium::texture::RawImage2d::from_raw_rgba_reversed(&image.into_raw(), image_dimensions);
+			let texture = glium::texture::SrgbTexture2d::new(&data.gl_display, image).unwrap();
+
+			let uniforms = uniform! {
+				matrix: [
+					[1.0, 0.0, 0.0, 0.0],
+					[0.0, 1.0, 0.0, 0.0],
+					[0.0, 0.0, 1.0, 0.0],
+					[0.0, 0.0, 0.0, 1.0f32],
+				],
+				tex: &texture,
+			};
+
+			let vertex_shader_src = r#"
+				#version 140
+				in vec2 position;
+				in vec2 tex_coords;
+				out vec2 v_tex_coords;
+				uniform mat4 matrix;
+				void main() {
+					v_tex_coords = tex_coords;
+					gl_Position = matrix * vec4(position, 0.0, 1.0);
+				}
+			"#;
+		
+			let fragment_shader_src = r#"
+				#version 140
+				in vec2 v_tex_coords;
+				out vec4 color;
+				uniform sampler2D tex;
+				void main() {
+					color = texture(tex, v_tex_coords);
+				}
+			"#;
 			
+			let program = glium::Program::from_source(&data.gl_display, vertex_shader_src, fragment_shader_src, None).unwrap();
+			
+			target.draw(&vertex_buffer, &index_buffer, &program, &uniforms,
+				&Default::default()).unwrap();
+
 			// Render that ImGui frame to target
 			data.im_renderer.render(&mut target, ui.render()).unwrap();
 			
@@ -197,6 +281,7 @@ window_loop( mut data: WindowData )
 		std::mem::drop(imgui_io);
 	});
 }
+
 
 pub fn
 window()
