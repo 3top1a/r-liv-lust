@@ -180,7 +180,7 @@ impl WindowData {
 
 				// Image
 				let image = image::load(
-					Cursor::new(&include_bytes!("../logo.png")),
+					Cursor::new(&include_bytes!("../example.png")),
 					image::ImageFormat::Png,
 				)
 				.unwrap()
