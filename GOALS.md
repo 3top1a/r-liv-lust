@@ -6,7 +6,7 @@ Goal 0 DONE
 
 Goal 1
 [ ] Zoom and pan
-[ ] Transparency
+[x] Transparency
 [ ] Pixel art / logo friendly
 
 Goal 1
