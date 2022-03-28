@@ -14,7 +14,7 @@ fn main() {
 	}
 
 	// Create window and main loop
-	ui::window("../example.png");
+	ui::window("example.png");
 
 	// Exit
 	std::process::exit(0)
