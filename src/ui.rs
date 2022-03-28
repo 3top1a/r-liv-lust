@@ -17,7 +17,7 @@ implement_vertex!(Vertex, position, tex_coords);
 
 struct WindowData {
 	// OpenGl
-	gl_event_loop: glutin::event_loop::EventLoop<()>,
+	//gl_event_loop: glutin::event_loop::EventLoop<()>,
 	gl_display: glium::Display,
 
 	// ImGui
@@ -26,9 +26,9 @@ struct WindowData {
 }
 
 impl WindowData {
-	fn new() -> WindowData {
-		let width = 1024;
-		let height = 768;
+	fn new() -> (WindowData, glutin::event_loop::EventLoop<()>) {
+		let width = 1024i32;
+		let height = 768i32;
 
 		// Create OpenGL window
 		let event_loop = glutin::event_loop::EventLoop::new();
@@ -56,16 +56,17 @@ impl WindowData {
 		let imgui_renderer =
 			imgui_glium_renderer::Renderer::init(&mut imgui_builder, &display).unwrap();
 
-		WindowData {
-			gl_event_loop: event_loop,
+		(WindowData {
 			gl_display: display,
 			im_builder: imgui_builder,
 			im_renderer: imgui_renderer,
-		}
+		},
+		event_loop
+	)
 	}
 
-	fn window_loop(mut self) {
-		self.gl_event_loop.run(move |event, _, control_flow| {
+	fn window_loop(mut self, event: glutin::event_loop::EventLoop<()> ) {
+		event.run(move |event, _, control_flow| {
 			let event_ref = &event;
 
 			// Close
@@ -304,8 +305,8 @@ impl WindowData {
 
 pub fn window() {
 	//* Init
-	let data = WindowData::new();
+	let (data, event_loop) = WindowData::new();
 
 	//* Loop
-	data.window_loop();
+	data.window_loop(event_loop);
 }
