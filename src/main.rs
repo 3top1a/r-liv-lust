@@ -1,5 +1,5 @@
-mod ui;
 mod shaders;
+mod ui;
 
 fn main() {
 	// Debug
