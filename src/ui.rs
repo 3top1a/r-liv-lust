@@ -1,8 +1,11 @@
+// shaders.rs
+// Responsible for all GUI related stuff (so most of the code)
+// Beware of spaghetti
+
 extern crate glium;
 extern crate image;
 extern crate imgui;
 extern crate imgui_glium_renderer;
-
 
 use glium::*;
 
@@ -13,7 +16,6 @@ struct Vertex {
 	position: [f32; 2],
 	tex_coords: [f32; 2],
 }
-
 implement_vertex!(Vertex, position, tex_coords);
 
 fn load_texture(display: &glium::Display, filename: String) -> Result<glium::texture::SrgbTexture2d, u8>
@@ -43,12 +45,13 @@ struct WindowData {
 	im_builder: imgui::Context,
 	im_renderer: imgui_glium_renderer::Renderer,
 	
-	// Etc
+	// Texture
 	image_texture: Option<glium::texture::SrgbTexture2d>,
 }
 
 impl WindowData {
 	fn new(filename: String) -> (WindowData, glutin::event_loop::EventLoop<()>) {
+		// Default window size
 		let width = 1024i32;
 		let height = 768i32;
 
@@ -58,12 +61,10 @@ impl WindowData {
 			.with_title("Asd")
 			.with_decorations(false)
 			.with_inner_size(glutin::dpi::LogicalSize::new(width, height));
-
 		let context_builder = glutin::ContextBuilder::new()
 			.with_vsync(false)
 			.with_hardware_acceleration(Some(true))
 			.with_multisampling(0);
-
 		let display = glium::Display::new(window_builder, context_builder, &event_loop).unwrap();
 
 		// Create ImGui
@@ -75,11 +76,14 @@ impl WindowData {
 		imgui_builder.style_mut().window_rounding = 0.0;
 		imgui_builder.style_mut().window_border_size = 1.0;
 
+		// Make renderer
 		let imgui_renderer =
 			imgui_glium_renderer::Renderer::init(&mut imgui_builder, &display).unwrap();
 
+		// Get image
 		let image = load_texture(&display, filename).unwrap();
 
+		// Return data
 		(
 			WindowData {
 				image_texture: Some(image),
@@ -154,7 +158,7 @@ impl WindowData {
 				ui.text(format!("Calculated FPS: {}", 1.0 / delta));
 			});
 
-		// Triangle
+		// Make quad
 		let vertex_buffer = {
 			glium::VertexBuffer::new(
 				&self.gl_display,
@@ -191,8 +195,10 @@ impl WindowData {
 			tex: self.image_texture.as_ref().unwrap(),
 		};
 
+		// Get shader
 		let (vertex_shader, fragment_shader) = shaders::get_shader(self.gl_display.get_opengl_version());
 
+		// Create program
 		let program = glium::Program::from_source(
 			&self.gl_display,
 			vertex_shader.as_str(),
@@ -201,6 +207,7 @@ impl WindowData {
 		)
 		.unwrap();
 
+		// Draw the quad
 		target
 			.draw(
 				&vertex_buffer,
@@ -214,10 +221,12 @@ impl WindowData {
 		// Render that ImGui frame to target
 		self.im_renderer.render(&mut target, ui.render()).unwrap();
 
+		// End
 		target.finish().unwrap();
 	}
 
 	fn window_loop(mut self, event: glutin::event_loop::EventLoop<()>) {
+		// Loop
 		event.run(move |event, _, control_flow| {
 			let event_ref = &event;
 
@@ -241,7 +250,7 @@ impl WindowData {
 			}
 			std::mem::drop(event_ref);
 
-			//* Draw
+			// Draw
 			if let glutin::event::Event::RedrawRequested { .. } = event_ref {
 				self.draw();
 			}
@@ -301,9 +310,9 @@ impl WindowData {
 }
 
 pub fn window(filename: &str) {
-	//* Init
+	// Init
 	let (data, event_loop) = WindowData::new(filename.to_string());
 
-	//* Loop
+	// Loop
 	data.window_loop(event_loop);
 }

@@ -68,6 +68,6 @@ pub fn get_shader(version: &glium::Version) -> (String, String)
 
     (
         vertex_shader_src,
-        fragment_shader_src
+        fragment_shader_src,
     )
 }
