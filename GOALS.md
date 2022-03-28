@@ -19,11 +19,13 @@ Goal 3
 
 Goal 4
 [ ] Faster loading
+[ ] Expose settings into seperate file
 [ ] Get production ready
 
 Goal 5
 [ ] Image slide show
 [ ] Image editing
 
-Goal 6
+Goal ???
+[ ] Transition to more low level OpenGL
 [ ] ???

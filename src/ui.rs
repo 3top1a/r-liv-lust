@@ -18,6 +18,25 @@ struct Vertex {
 }
 implement_vertex!(Vertex, position, tex_coords);
 
+struct WindowData {
+	// OpenGl
+	//gl_event_loop: glutin::event_loop::EventLoop<()>,
+	gl_display: glium::Display,
+	uniform: [[f32; 4]; 4],
+
+	// ImGui
+	im_builder: imgui::Context,
+	im_renderer: imgui_glium_renderer::Renderer,
+
+	// Texture
+	image_texture: Option<glium::texture::SrgbTexture2d>,
+
+	// UI
+	debug_menu: bool,
+	example_menu: bool,
+	metadata_menu: bool,
+}
+
 fn load_texture(
 	display: &glium::Display,
 	filename: String,
@@ -44,20 +63,6 @@ fn load_texture(
 		)
 		.unwrap(),
 	)
-}
-
-struct WindowData {
-	// OpenGl
-	//gl_event_loop: glutin::event_loop::EventLoop<()>,
-	gl_display: glium::Display,
-	uniform: [[f32; 4]; 4],
-
-	// ImGui
-	im_builder: imgui::Context,
-	im_renderer: imgui_glium_renderer::Renderer,
-
-	// Texture
-	image_texture: Option<glium::texture::SrgbTexture2d>,
 }
 
 impl WindowData {
@@ -109,6 +114,9 @@ impl WindowData {
 				],
 				im_builder: imgui_builder,
 				im_renderer: imgui_renderer,
+				debug_menu: false,
+				example_menu: false,
+				metadata_menu: false,
 			},
 			event_loop,
 		)
@@ -133,43 +141,51 @@ impl WindowData {
 		// Make a frame
 		let ui = self.im_builder.frame();
 
-		// Add a test window
-		imgui::Window::new(imgui::im_str!("Test window"))
-			.size([300.0, 100.0], imgui::Condition::FirstUseEver)
-			.build(&ui, || {
-				ui.text("Hello world!");
-				ui.text("This...is...imgui-rs!");
-				ui.button(imgui::im_str!("Test"), [60.0, 20.0]);
-				ui.separator();
-			});
+		// Example window
+		if self.example_menu {
+			imgui::Window::new(imgui::im_str!("Test window"))
+				.size([300.0, 100.0], imgui::Condition::FirstUseEver)
+				.build(&ui, || {
+					ui.text("Hello world!");
+					ui.text("This...is...r-liv!");
+					ui.separator();
+					ui.bullet();
+					ui.button(imgui::im_str!("Test"), [60.0, 20.0]);
+					ui.separator();
+					ui.text("R-liv is made by 3top1a with love!");
+					ui.text("It is licensed under AGPL-3.0 License");
+				});
+		}
 
-		// Add the debug window
-		imgui::Window::new(imgui::im_str!("Debug"))
-			.size([350.0, 100.0], imgui::Condition::FirstUseEver)
-			.position(
-				[(width as f32 / 2f32) - (350.0 / 2.0), 10.0],
-				imgui::Condition::Always,
-			)
-			.bg_alpha(0.25)
-			.scrollable(false)
-			.collapsible(false)
-			.movable(false)
-			.no_decoration()
-			.scroll_bar(false)
-			.resizable(false)
-			.build(&ui, || {
-				ui.text("Debug menu");
-				ui.separator();
-				ui.text(format!(
-					"Free VRAM: {}MB",
-					self.gl_display
-						.get_free_video_memory()
-						.unwrap_or(usize::MIN) / 1_000_000
-				));
-				ui.text(format!("Reported FPS: {}", framerate));
-				ui.text(format!("Delta: {}", delta));
-				ui.text(format!("Calculated FPS: {}", 1.0 / delta));
-			});
+		// Debug window
+		if self.debug_menu {
+			imgui::Window::new(imgui::im_str!("Debug"))
+				.size([350.0, 100.0], imgui::Condition::FirstUseEver)
+				.position(
+					[(width as f32 / 2f32) - (350.0 / 2.0), 10.0],
+					imgui::Condition::Always,
+				)
+				.bg_alpha(0.25)
+				.scrollable(false)
+				.collapsible(false)
+				.movable(false)
+				.no_decoration()
+				.scroll_bar(false)
+				.resizable(false)
+				.build(&ui, || {
+					ui.text("Debug menu");
+					ui.separator();
+					ui.text(format!(
+						"Free VRAM: {}MB",
+						self.gl_display
+							.get_free_video_memory()
+							.unwrap_or(usize::MIN) / 1_000_000
+					));
+					ui.text(format!("Reported FPS: {}", framerate));
+					ui.text(format!("Delta: {}", delta));
+					ui.text(format!("Calculated FPS: {}", 1.0 / delta));
+				});
+		}
 
 		// Make quad
 		let vertex_buffer = {
@@ -271,6 +287,37 @@ impl WindowData {
 				}
 			}
 			std::mem::drop(event_ref);
+
+			// Menus
+			if let glutin::event::Event::WindowEvent { event, .. } = event_ref {
+				match event {
+					// If F2 **pressed**
+					glutin::event::WindowEvent::KeyboardInput {
+						input:
+							glutin::event::KeyboardInput {
+								state: glutin::event::ElementState::Pressed,
+								virtual_keycode: Some(glutin::event::VirtualKeyCode::F2),
+								..
+							},
+						..
+					} => {
+						self.debug_menu = !self.debug_menu;
+					}
+					// If Home **pressed**
+					glutin::event::WindowEvent::KeyboardInput {
+						input:
+							glutin::event::KeyboardInput {
+								state: glutin::event::ElementState::Pressed,
+								virtual_keycode: Some(glutin::event::VirtualKeyCode::Home),
+								..
+							},
+						..
+					} => {
+						self.example_menu = !self.example_menu;
+					}
+					_ => (),
+				}
+			}
 
 			// Resized
 			if let glutin::event::Event::WindowEvent { event, .. } = event_ref {
