@@ -36,9 +36,7 @@ fn load_texture(
 		size,
 	);
 	Ok(
-		// !This will error when image doesn't support this many mipmaps!
-		//TODO FIX
-		//? Do we need mipmaps?
+		//? Do we need mipmaps? Won't they just cost performance?
 		glium::texture::SrgbTexture2d::with_mipmaps(
 			display,
 			image,
