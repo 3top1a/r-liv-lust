@@ -1,8 +1,8 @@
 # Goals
 
-Goal 0
+Goal 0 DONE
 [x] Fill image to screen
-[ ] Draw image in arguments
+[x] Draw image in arguments
 
 Goal 1
 [ ] Zoom and pan

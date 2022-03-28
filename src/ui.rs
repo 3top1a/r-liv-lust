@@ -29,7 +29,6 @@ fn load_texture(display: &glium::Display, filename: String) -> Result<glium::tex
 	}
 
 	let iimage = image::open(name).unwrap();
-	iimage.save("logo2.png");
 	let size = image::image_dimensions(name).unwrap();
 	let image = glium::texture::RawImage2d::from_raw_rgba_reversed(&iimage.as_rgba8().unwrap().to_vec(), size);
 	Ok(
