@@ -237,7 +237,7 @@ impl WindowData {
 				&uniforms,
 				&glium::DrawParameters {
 					blend: Blend::alpha_blending(),
-					.. Default::default()
+					..Default::default()
 				},
 			)
 			.unwrap();

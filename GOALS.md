@@ -9,11 +9,9 @@ Goal 1
 [x] Transparency
 [ ] Pixel art / logo friendly
 
-Goal 1
+Goal 2
 [ ] Window stuff
     [ ] Resize screen on zoom when not in fullscreen
-
-Goal 2
 [ ] Show metadata
 
 Goal 3
