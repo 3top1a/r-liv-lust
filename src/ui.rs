@@ -164,11 +164,11 @@ impl WindowData {
 				&self.gl_display,
 				&[
 					Vertex {
-						position: [0.0, 0.0],
+						position: [-1.0, -1.0],
 						tex_coords: [0.0, 0.0],
 					},
 					Vertex {
-						position: [0.0, 1.0],
+						position: [-1.0, 1.0],
 						tex_coords: [0.0, 1.0],
 					},
 					Vertex {
@@ -176,7 +176,7 @@ impl WindowData {
 						tex_coords: [1.0, 1.0],
 					},
 					Vertex {
-						position: [1.0, 0.0],
+						position: [1.0, -1.0],
 						tex_coords: [1.0, 0.0],
 					},
 				],
@@ -249,6 +249,41 @@ impl WindowData {
 				}
 			}
 			std::mem::drop(event_ref);
+
+			// Resized
+			if let glutin::event::Event::WindowEvent {event, ..} = event_ref {
+				match event{
+					glutin::event::WindowEvent::Resized(window_size) => {
+						let image_width = (self.image_texture.as_ref().unwrap().get_width() ) as f32;
+						//? Why does height need unwrap() but width doesn't?
+						let image_height = (self.image_texture.as_ref().unwrap().get_height().unwrap() ) as f32;
+
+						let image_ratio = (image_width / image_height ) as f32;
+						let window_ratio = window_size.width as f32 / window_size.height as f32;
+
+						// From ArturKovacs/emulsion
+						let mut scale_x = 1f32;
+						let mut scale_y = 1f32;
+
+						if image_ratio < window_ratio
+						{
+							scale_x = ((image_ratio / window_ratio) * window_size.width as f32).floor() / window_size.width as f32
+						}
+						else
+						{
+							scale_y = ((window_ratio / image_ratio) * window_size.height as f32).floor() / window_size.height as f32
+						}
+
+						self.uniform = [
+							[scale_x, 0.0, 0.0, 0.0],
+							[0.0, scale_y, 0.0, 0.0],
+							[0.0, 0.0, 1.0, 0.0],
+							[0.0, 0.0, 0.0, 1.0f32],
+						]
+					},
+					_ => (),
+				}
+			}
 
 			// Draw
 			if let glutin::event::Event::RedrawRequested { .. } = event_ref {
