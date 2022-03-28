@@ -3,12 +3,15 @@ extern crate image;
 extern crate imgui;
 extern crate imgui_glium_renderer;
 
+
 use glium::*;
+
+use crate::shaders;
 
 #[derive(Copy, Clone)]
 struct Vertex {
 	position: [f32; 2],
-	tex_coords: [f32; 2], // <- this is new
+	tex_coords: [f32; 2],
 }
 
 implement_vertex!(Vertex, position, tex_coords);
@@ -188,32 +191,12 @@ impl WindowData {
 			tex: self.image_texture.as_ref().unwrap(),
 		};
 
-		let vertex_shader_src = r#"
-			#version 140
-			in vec2 position;
-			in vec2 tex_coords;
-			out vec2 v_tex_coords;
-			uniform mat4 matrix;
-			void main() {
-				v_tex_coords = tex_coords;
-				gl_Position = matrix * vec4(position, 0.0, 1.0);
-			}
-		"#;
-
-		let fragment_shader_src = r#"
-			#version 140
-			in vec2 v_tex_coords;
-			out vec4 color;
-			uniform sampler2D tex;
-			void main() {
-				color = texture(tex, v_tex_coords);
-			}
-		"#;
+		let (vertex_shader, fragment_shader) = shaders::get_shader(self.gl_display.get_opengl_version());
 
 		let program = glium::Program::from_source(
 			&self.gl_display,
-			vertex_shader_src,
-			fragment_shader_src,
+			vertex_shader.as_str(),
+			fragment_shader.as_str(),
 			None,
 		)
 		.unwrap();
