@@ -5,23 +5,24 @@ Goal 0 DONE
 [x] Draw image in arguments
 
 Goal 1
-[ ] Zoom and pan
 [x] Transparency
-[ ] Pixel art / logo friendly
+[ ] UI, buttons and UI state
 
 Goal 2
+[ ] Zoom and pan
+[ ] Pixel art / logo friendly
+
+Goal 3
 [ ] Window stuff
     [ ] Resize screen on zoom when not in fullscreen
 [ ] Show metadata
 
-Goal 3
+Goal 4
 [ ] Faster loading
 [ ] Get production ready
 
-Goal 4
-[ ] Image slide show
-
 Goal 5
+[ ] Image slide show
 [ ] Image editing
 
 Goal 6
