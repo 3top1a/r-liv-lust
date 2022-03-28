@@ -15,7 +15,8 @@ fn main() {
 	}
 
 	// Create window and main loop
-	ui::window("example.png");
+	//TODO Better argument parsing
+	ui::window(&args[args.len() - 1]);
 
 	// Exit
 	std::process::exit(0)

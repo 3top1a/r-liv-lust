@@ -17,7 +17,7 @@ pub fn get_shader(version: &glium::Version) -> (String, String)
     let vertex_shader_src: String;
     let fragment_shader_src: String;
 
-    if *version > glium::Version(glium::Api::Gl, 1, 4)
+    if *version > glium::Version(glium::Api::Gl, 1, 4) || *version == glium::Version(glium::Api::Gl, 1, 4)
     {
         vertex_shader_src = r#"
             #version 140
@@ -38,6 +38,7 @@ pub fn get_shader(version: &glium::Version) -> (String, String)
             uniform sampler2D tex;
             void main() {
                 color = texture(tex, v_tex_coords);
+                //color = vec4(0.0,0.0,0.0,0.1);
             }
         "#.to_string();
     }
