@@ -183,18 +183,6 @@ impl WindowData {
 		)
 		.unwrap();
 
-		// Image
-		/*let image = image::load(
-			Cursor::new(&include_bytes!("../example.png")),
-			image::ImageFormat::Png,
-		)
-		.unwrap()
-		.to_rgba8();
-		let image_dimensions = image.dimensions();
-		let image =
-			glium::texture::RawImage2d::from_raw_rgba_reversed(&image.into_raw(), image_dimensions);
-		let texture = glium::texture::SrgbTexture2d::new(&self.gl_display, image).unwrap();*/
-
 		let uniforms = uniform! {
 			matrix: self.uniform,
 			tex: self.image_texture.as_ref().unwrap(),
