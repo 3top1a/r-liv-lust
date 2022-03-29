@@ -7,8 +7,6 @@ extern crate image;
 extern crate imgui;
 extern crate imgui_glium_renderer;
 
-use glium::*;
-
 use crate::shaders;
 
 #[derive(Copy, Clone)]
@@ -16,7 +14,7 @@ struct Vertex {
 	position: [f32; 2],
 	tex_coords: [f32; 2],
 }
-implement_vertex!(Vertex, position, tex_coords);
+glium::implement_vertex!(Vertex, position, tex_coords);
 
 struct WindowData {
 	// OpenGl
@@ -72,19 +70,19 @@ fn load_texture(
 }
 
 impl WindowData {
-	fn new(filename: String) -> (WindowData, glutin::event_loop::EventLoop<()>) {
+	fn new(filename: String) -> (WindowData, glium::glutin::event_loop::EventLoop<()>) {
 		// Default window size
 		let width = 1024i32;
 		let height = 768i32;
 
 		// Create OpenGL window
-		let event_loop = glutin::event_loop::EventLoop::new();
-		let window_builder = glutin::window::WindowBuilder::new()
+		let event_loop = glium::glutin::event_loop::EventLoop::new();
+		let window_builder = glium::glutin::window::WindowBuilder::new()
 			.with_title("Asd")
 			.with_decorations(false)
 			.with_visible(true)
-			.with_inner_size(glutin::dpi::LogicalSize::new(width, height));
-		let context_builder = glutin::ContextBuilder::new()
+			.with_inner_size(glium::glutin::dpi::LogicalSize::new(width, height));
+		let context_builder = glium::glutin::ContextBuilder::new()
 			.with_vsync(false)
 			.with_hardware_acceleration(Some(true))
 			.with_multisampling(0)
@@ -135,7 +133,7 @@ impl WindowData {
 		let mut target = self.gl_display.draw();
 
 		// Background
-		target.clear_color(0.05, 0.05, 0.05, 1.0);
+		glium::Surface::clear_color(&mut target, 0.05, 0.05, 0.05, 1.0);
 
 		// ImGui IO
 		let framerate = self.im_builder.io().framerate;
@@ -257,7 +255,7 @@ impl WindowData {
 		)
 		.unwrap();
 
-		let uniforms = uniform! {
+		let uniforms = glium::uniform! {
 			matrix: self.uniform,
 			tex: self.image_texture.as_ref().unwrap().sampled()
 			.wrap_function(glium::uniforms::SamplerWrapFunction::Clamp)
@@ -281,19 +279,12 @@ impl WindowData {
 		.unwrap();
 
 		// Draw the quad
-		target
-			.draw(
-				&vertex_buffer,
-				&index_buffer,
-				&program,
-				&uniforms,
-				&glium::DrawParameters {
-					blend: Blend::alpha_blending(),
+		glium::Surface::draw(&mut target, &vertex_buffer, &index_buffer, &program, &uniforms, &glium::DrawParameters {
+					blend: glium::Blend::alpha_blending(),
 					dithering: true,
-					backface_culling: BackfaceCullingMode::CullingDisabled,
+					backface_culling: glium::BackfaceCullingMode::CullingDisabled,
 					..Default::default()
-				},
-			)
+				})
 			.unwrap();
 
 		// Render that ImGui frame to target
@@ -303,24 +294,24 @@ impl WindowData {
 		target.finish().unwrap();
 	}
 
-	fn window_loop(mut self, event: glutin::event_loop::EventLoop<()>) {
+	fn window_loop(mut self, event: glium::glutin::event_loop::EventLoop<()>) {
 		// Loop
 		event.run(move |event, _, control_flow| {
 			let event_ref = &event;
 
 			// Close
-			if let glutin::event::Event::WindowEvent { event, .. } = event_ref {
+			if let glium::glutin::event::Event::WindowEvent { event, .. } = event_ref {
 				match event {
-					glutin::event::WindowEvent::CloseRequested
-					| glutin::event::WindowEvent::KeyboardInput {
+					glium::glutin::event::WindowEvent::CloseRequested
+					| glium::glutin::event::WindowEvent::KeyboardInput {
 						input:
-							glutin::event::KeyboardInput {
-								virtual_keycode: Some(glutin::event::VirtualKeyCode::Escape),
+							glium::glutin::event::KeyboardInput {
+								virtual_keycode: Some(glium::glutin::event::VirtualKeyCode::Escape),
 								..
 							},
 						..
 					} => {
-						*control_flow = glutin::event_loop::ControlFlow::Exit;
+						*control_flow = glium::glutin::event_loop::ControlFlow::Exit;
 						return;
 					}
 					_ => (),
@@ -329,14 +320,14 @@ impl WindowData {
 			std::mem::drop(event_ref);
 
 			// Menus
-			if let glutin::event::Event::WindowEvent { event, .. } = event_ref {
+			if let glium::glutin::event::Event::WindowEvent { event, .. } = event_ref {
 				match event {
 					// If F2 **pressed**
-					glutin::event::WindowEvent::KeyboardInput {
+					glium::glutin::event::WindowEvent::KeyboardInput {
 						input:
-							glutin::event::KeyboardInput {
-								state: glutin::event::ElementState::Pressed,
-								virtual_keycode: Some(glutin::event::VirtualKeyCode::F2),
+							glium::glutin::event::KeyboardInput {
+								state: glium::glutin::event::ElementState::Pressed,
+								virtual_keycode: Some(glium::glutin::event::VirtualKeyCode::F2),
 								..
 							},
 						..
@@ -344,11 +335,11 @@ impl WindowData {
 						self.debug_menu = !self.debug_menu;
 					}
 					// If Home **pressed**
-					glutin::event::WindowEvent::KeyboardInput {
+					glium::glutin::event::WindowEvent::KeyboardInput {
 						input:
-							glutin::event::KeyboardInput {
-								state: glutin::event::ElementState::Pressed,
-								virtual_keycode: Some(glutin::event::VirtualKeyCode::Home),
+							glium::glutin::event::KeyboardInput {
+								state: glium::glutin::event::ElementState::Pressed,
+								virtual_keycode: Some(glium::glutin::event::VirtualKeyCode::Home),
 								..
 							},
 						..
@@ -356,11 +347,11 @@ impl WindowData {
 						self.example_menu = !self.example_menu;
 					}
 					// If space **pressed**
-					glutin::event::WindowEvent::KeyboardInput {
+					glium::glutin::event::WindowEvent::KeyboardInput {
 						input:
-							glutin::event::KeyboardInput {
-								state: glutin::event::ElementState::Pressed,
-								virtual_keycode: Some(glutin::event::VirtualKeyCode::Space),
+							glium::glutin::event::KeyboardInput {
+								state: glium::glutin::event::ElementState::Pressed,
+								virtual_keycode: Some(glium::glutin::event::VirtualKeyCode::Space),
 								..
 							},
 						..
@@ -372,9 +363,9 @@ impl WindowData {
 			}
 
 			// Resized
-			if let glutin::event::Event::WindowEvent { event, .. } = event_ref {
+			if let glium::glutin::event::Event::WindowEvent { event, .. } = event_ref {
 				match event {
-					glutin::event::WindowEvent::Resized(window_size) => {
+					glium::glutin::event::WindowEvent::Resized(window_size) => {
 						let image_width = (self.image_texture.as_ref().unwrap().get_width()) as f32;
 						//? Why does height need unwrap() but width doesn't?
 						let image_height =
@@ -407,27 +398,27 @@ impl WindowData {
 			}
 
 			// Draw
-			if let glutin::event::Event::RedrawRequested { .. } = event_ref {
+			if let glium::glutin::event::Event::RedrawRequested { .. } = event_ref {
 				self.draw();
 			}
 
 			// Set mouse stuff
 			let mut imgui_io = self.im_builder.io_mut();
-			if let glutin::event::Event::WindowEvent { event, .. } = event_ref {
+			if let glium::glutin::event::Event::WindowEvent { event, .. } = event_ref {
 				match event {
-					glutin::event::WindowEvent::CursorMoved { position, .. } => {
+					glium::glutin::event::WindowEvent::CursorMoved { position, .. } => {
 						// TODO Better mouse movement
 						// This has a lot of delay when dragging
 						imgui_io.mouse_pos = [position.x as f32, position.y as f32];
 					}
-					glutin::event::WindowEvent::MouseInput { state, button, .. } => {
+					glium::glutin::event::WindowEvent::MouseInput { state, button, .. } => {
 						let mut s = false;
-						if state == &glutin::event::ElementState::Pressed {
+						if state == &glium::glutin::event::ElementState::Pressed {
 							s = true;
 						}
 
 						match button {
-							glutin::event::MouseButton::Left => {
+							glium::glutin::event::MouseButton::Left => {
 								imgui_io.mouse_down = [
 									s,
 									imgui_io.mouse_down[1],
@@ -436,7 +427,7 @@ impl WindowData {
 									imgui_io.mouse_down[4],
 								];
 							}
-							glutin::event::MouseButton::Right => {
+							glium::glutin::event::MouseButton::Right => {
 								imgui_io.mouse_down = [
 									imgui_io.mouse_down[0],
 									s,
@@ -445,7 +436,7 @@ impl WindowData {
 									imgui_io.mouse_down[4],
 								];
 							}
-							glutin::event::MouseButton::Middle => {
+							glium::glutin::event::MouseButton::Middle => {
 								imgui_io.mouse_down = [
 									imgui_io.mouse_down[0],
 									imgui_io.mouse_down[1],
