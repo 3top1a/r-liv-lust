@@ -35,6 +35,7 @@ struct WindowData {
 	debug_menu: bool,
 	example_menu: bool,
 	metadata_menu: bool,
+	action_menu: bool,
 }
 
 fn load_texture(
@@ -48,10 +49,15 @@ fn load_texture(
 		std::process::exit(1);
 	}
 
+	// TODO Optimize this loading function
+	// `&iimage.into_rgba8()` Why 16 bit? Why alpha?
+	// Shouldn't the function be determined seperately?
+	// 99% of images are 8bit
+	// 80% of images are **not** transparent
 	let iimage = image::open(name).unwrap();
 	let size = image::image_dimensions(name).unwrap();
 	let image = glium::texture::RawImage2d::from_raw_rgba_reversed(
-		&iimage.as_rgba8().unwrap().to_vec(),
+		&iimage.into_rgba8().to_vec(),
 		size,
 	);
 	Ok(
@@ -85,6 +91,7 @@ impl WindowData {
 			.with_depth_buffer(0);
 		let display = glium::Display::new(window_builder, context_builder, &event_loop).unwrap();
 
+		//display.gl_window().window().set_title(title)
 		// Create ImGui
 		let mut imgui_builder = imgui::Context::create();
 
@@ -117,6 +124,7 @@ impl WindowData {
 				debug_menu: false,
 				example_menu: false,
 				metadata_menu: false,
+				action_menu: true,
 			},
 			event_loop,
 		)
@@ -141,6 +149,66 @@ impl WindowData {
 		// Make a frame
 		let ui = self.im_builder.frame();
 
+		// Buttons
+		if self.action_menu {
+			imgui::Window::new(imgui::im_str!("Buttons"))
+				.size([350.0, 32.0], imgui::Condition::FirstUseEver)
+				.position(
+					[(width as f32 / 2.0) - (ui.window_size()[0] / 2.0), height as f32 - 10.0 - 32.0],
+					imgui::Condition::FirstUseEver,
+				)
+				.bg_alpha(0.1)
+				.scrollable(false)
+				.collapsible(false)
+				.movable(true)
+				.no_decoration()
+				.scroll_bar(false)
+				.resizable(false)
+				.always_auto_resize(true)
+				.title_bar(false)
+				.build(&ui, || {
+					if ui.button(imgui::im_str!("E"), [32.0, 32.0])
+					{
+						self.example_menu = !self.example_menu;
+					}
+					if ui.button(imgui::im_str!("D"), [32.0, 32.0])
+					{
+						self.debug_menu = !self.debug_menu;
+					}
+				});
+		}
+
+		// Debug window
+		if self.debug_menu {
+			imgui::Window::new(imgui::im_str!("Debug"))
+				.size([350.0, 100.0], imgui::Condition::FirstUseEver)
+				.position(
+					[(width as f32 / 2f32) - (ui.window_size()[0] / 2.0), 10.0],
+					imgui::Condition::Always,
+				)
+				.bg_alpha(0.1)
+				.scrollable(false)
+				.collapsible(false)
+				.movable(true)
+				.no_decoration()
+				.scroll_bar(false)
+				.resizable(false)
+				.title_bar(false)
+				.build(&ui, || {
+					ui.text("Debug menu");
+					ui.separator();
+					ui.text(format!(
+						"Free VRAM: {}MB",
+						self.gl_display
+							.get_free_video_memory()
+							.unwrap_or(usize::MIN) / 1_000_000
+					));
+					ui.text(format!("Reported FPS: {}", framerate));
+					ui.text(format!("Delta: {}", delta));
+					ui.text(format!("Calculated FPS: {}", 1.0 / delta));
+				});
+		}
+
 		// Example window
 		if self.example_menu {
 			imgui::Window::new(imgui::im_str!("Test window"))
@@ -154,36 +222,6 @@ impl WindowData {
 					ui.separator();
 					ui.text("R-liv is made by 3top1a with love!");
 					ui.text("It is licensed under AGPL-3.0 License");
-				});
-		}
-
-		// Debug window
-		if self.debug_menu {
-			imgui::Window::new(imgui::im_str!("Debug"))
-				.size([350.0, 100.0], imgui::Condition::FirstUseEver)
-				.position(
-					[(width as f32 / 2f32) - (350.0 / 2.0), 10.0],
-					imgui::Condition::Always,
-				)
-				.bg_alpha(0.25)
-				.scrollable(false)
-				.collapsible(false)
-				.movable(false)
-				.no_decoration()
-				.scroll_bar(false)
-				.resizable(false)
-				.build(&ui, || {
-					ui.text("Debug menu");
-					ui.separator();
-					ui.text(format!(
-						"Free VRAM: {}MB",
-						self.gl_display
-							.get_free_video_memory()
-							.unwrap_or(usize::MIN) / 1_000_000
-					));
-					ui.text(format!("Reported FPS: {}", framerate));
-					ui.text(format!("Delta: {}", delta));
-					ui.text(format!("Calculated FPS: {}", 1.0 / delta));
 				});
 		}
 
@@ -251,6 +289,8 @@ impl WindowData {
 				&uniforms,
 				&glium::DrawParameters {
 					blend: Blend::alpha_blending(),
+					dithering: true,
+					backface_culling: BackfaceCullingMode::CullingDisabled,
 					..Default::default()
 				},
 			)
@@ -314,6 +354,18 @@ impl WindowData {
 						..
 					} => {
 						self.example_menu = !self.example_menu;
+					}
+					// If space **pressed**
+					glutin::event::WindowEvent::KeyboardInput {
+						input:
+							glutin::event::KeyboardInput {
+								state: glutin::event::ElementState::Pressed,
+								virtual_keycode: Some(glutin::event::VirtualKeyCode::Space),
+								..
+							},
+						..
+					} => {
+						self.action_menu = !self.action_menu;
 					}
 					_ => (),
 				}
