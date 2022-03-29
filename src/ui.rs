@@ -9,6 +9,8 @@ extern crate imgui_glium_renderer;
 
 use crate::shaders;
 
+use std::time::{Instant};
+
 #[derive(Copy, Clone)]
 struct Vertex {
 	position: [f32; 2],
@@ -52,13 +54,30 @@ fn load_texture(
 	// Shouldn't the function be determined seperately?
 	// 99% of images are 8bit
 	// 80% of images are **not** transparent
+
+	// S1
+	// Takes 3.5s
+	let s1 = Instant::now();
 	let iimage = image::open(name).unwrap();
+	println!("{}", s1.elapsed().as_millis());
+
+	// S2
+	// Takes 1ms
+	let s2 = Instant::now();
 	let size = image::image_dimensions(name).unwrap();
+	println!("{}", s2.elapsed().as_millis());
+
+	// S3
+	// Takes 0.8s
+	let s3 = Instant::now();
 	let image = glium::texture::RawImage2d::from_raw_rgba_reversed(
 		&iimage.into_rgba8().to_vec(),
 		size,
 	);
+	println!("{}", s3.elapsed().as_millis());
+
 	Ok(
+		// S4
 		//? Do we need mipmaps? Won't they just cost performance?
 		glium::texture::SrgbTexture2d::with_mipmaps(
 			display,
@@ -104,7 +123,9 @@ impl WindowData {
 			imgui_glium_renderer::Renderer::init(&mut imgui_builder, &display).unwrap();
 
 		// Get image
+		let s1 = Instant::now();
 		let image = load_texture(&display, filename).unwrap();
+		println!("{}", s1.elapsed().as_millis());
 
 		// Return data
 		(
