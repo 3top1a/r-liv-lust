@@ -9,7 +9,7 @@ extern crate imgui_glium_renderer;
 
 use crate::shaders;
 
-use std::time::{Instant};
+use std::time::Instant;
 
 #[derive(Copy, Clone)]
 struct Vertex {
@@ -70,10 +70,8 @@ fn load_texture(
 	// S3
 	// Takes 0.8s
 	let s3 = Instant::now();
-	let image = glium::texture::RawImage2d::from_raw_rgba_reversed(
-		&iimage.into_rgba8().to_vec(),
-		size,
-	);
+	let image =
+		glium::texture::RawImage2d::from_raw_rgba_reversed(&iimage.into_rgba8().to_vec(), size);
 	println!("{}", s3.elapsed().as_millis());
 
 	Ok(
@@ -173,7 +171,10 @@ impl WindowData {
 			imgui::Window::new(imgui::im_str!("Buttons"))
 				.size([350.0, 32.0], imgui::Condition::FirstUseEver)
 				.position(
-					[(width as f32 / 2.0) - (ui.window_size()[0] / 2.0), height as f32 - 10.0 - 32.0],
+					[
+						(width as f32 / 2.0) - (ui.window_size()[0] / 2.0),
+						height as f32 - 10.0 - 32.0,
+					],
 					imgui::Condition::FirstUseEver,
 				)
 				.bg_alpha(0.1)
@@ -186,12 +187,10 @@ impl WindowData {
 				.always_auto_resize(true)
 				.title_bar(false)
 				.build(&ui, || {
-					if ui.button(imgui::im_str!("E"), [32.0, 32.0])
-					{
+					if ui.button(imgui::im_str!("E"), [32.0, 32.0]) {
 						self.example_menu = !self.example_menu;
 					}
-					if ui.button(imgui::im_str!("D"), [32.0, 32.0])
-					{
+					if ui.button(imgui::im_str!("D"), [32.0, 32.0]) {
 						self.debug_menu = !self.debug_menu;
 					}
 				});
@@ -300,13 +299,20 @@ impl WindowData {
 		.unwrap();
 
 		// Draw the quad
-		glium::Surface::draw(&mut target, &vertex_buffer, &index_buffer, &program, &uniforms, &glium::DrawParameters {
-					blend: glium::Blend::alpha_blending(),
-					dithering: true,
-					backface_culling: glium::BackfaceCullingMode::CullingDisabled,
-					..Default::default()
-				})
-			.unwrap();
+		glium::Surface::draw(
+			&mut target,
+			&vertex_buffer,
+			&index_buffer,
+			&program,
+			&uniforms,
+			&glium::DrawParameters {
+				blend: glium::Blend::alpha_blending(),
+				dithering: true,
+				backface_culling: glium::BackfaceCullingMode::CullingDisabled,
+				..Default::default()
+			},
+		)
+		.unwrap();
 
 		// Render that ImGui frame to target
 		self.im_renderer.render(&mut target, ui.render()).unwrap();
