@@ -392,6 +392,7 @@ impl WindowData {
 							[0.0, 0.0, 1.0, 0.0],
 							[0.0, 0.0, 0.0, 1.0f32],
 						];
+						self.gl_display.gl_window().window().request_redraw();
 					}
 					_ => (),
 				}
