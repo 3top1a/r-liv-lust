@@ -20,7 +20,7 @@
                 }
             },
             "args": [
-                "logo.png"
+                "example.png"
             ],
             "cwd": "${workspaceFolder}"
         },

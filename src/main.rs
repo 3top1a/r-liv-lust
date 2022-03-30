@@ -1,5 +1,6 @@
-mod ui;
 mod shaders;
+mod ui;
+mod utils;
 
 fn main() {
 	// Debug
