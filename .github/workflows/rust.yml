@@ -50,5 +50,5 @@ jobs:
       - name: Upload
         uses: actions/upload-artifact@v3
         with:
-          name: Linux Release
+          name: Windows Release
           path: target/release/r-liv.exe
