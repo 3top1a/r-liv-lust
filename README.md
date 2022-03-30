@@ -28,6 +28,6 @@ For powerusers, who want a image viewer that lets them do things quickly and not
 
 For normal users, who want a fast image viewer.
 
-For editors, taht don't want to open a fully featured editor to do something basic.
+For editors, that don't want to open a fully featured editor to do something basic like flipping or rotating an image.
 
 [^1]: https://github.com/image-rs/image/blob/master/README.md#supported-image-formats
