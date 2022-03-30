@@ -24,9 +24,9 @@ And I want to learn Rust.
 
 ## And for who?
 
-For powerusers, who want a image viewer that lets them do things quickly and not impact performance.
-
 For normal users, who want a fast image viewer.
+
+For powerusers, who want a image viewer that lets them do things quickly and not impact performance.
 
 For editors, taht don't want to open a fully featured editor to do something basic.
 
