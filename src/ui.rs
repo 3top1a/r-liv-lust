@@ -7,6 +7,7 @@ extern crate image;
 extern crate imgui;
 extern crate imgui_glium_renderer;
 
+use crate::settings;
 use crate::shaders;
 use crate::utils;
 
@@ -36,10 +37,22 @@ impl WindowData {
 		let width = 800i32;
 		let height = 600i32;
 
+		// Set title settings::Settings::WINDOW_TITLE
+		// Holy shit is this ever cursed
+		let title = format!(
+			"{} - {}",
+			settings::Settings::WINDOW_TITLE,
+			std::path::Path::new(&filename)
+				.file_name()
+				.unwrap_or_default()
+				.to_str()
+				.unwrap_or_default()
+		);
+
 		// Create OpenGL window
 		let event_loop = glium::glutin::event_loop::EventLoop::new();
 		let window_builder = glium::glutin::window::WindowBuilder::new()
-			.with_title("Asd")
+			.with_title(title)
 			.with_decorations(true)
 			.with_resizable(true)
 			.with_visible(true)
@@ -72,7 +85,12 @@ impl WindowData {
 		let image = utils::UiUtils::load_texture(&display, filename).unwrap();
 
 		// Auto resize image
-		display.gl_window().resize(glium::glutin::dpi::PhysicalSize::new(image.get_width(), image.get_height().unwrap()));
+		display
+			.gl_window()
+			.resize(glium::glutin::dpi::PhysicalSize::new(
+				image.get_width(),
+				image.get_height().unwrap(),
+			));
 
 		// Return data
 		(
@@ -199,13 +217,8 @@ impl WindowData {
 		}
 
 		// Make quad
-		let vertex_buffer = {
-			glium::VertexBuffer::new(
-				&self.gl_display,
-				&utils::UiUtils::QUAD,
-			)
-			.unwrap()
-		};
+		let vertex_buffer =
+			{ glium::VertexBuffer::new(&self.gl_display, &utils::UiUtils::QUAD).unwrap() };
 		let index_buffer = glium::IndexBuffer::new(
 			&self.gl_display,
 			glium::index::PrimitiveType::TriangleStrip,
