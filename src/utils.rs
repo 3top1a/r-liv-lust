@@ -3,7 +3,7 @@
 
 extern crate image;
 
-// Struct type
+// Vertex type
 #[derive(Copy, Clone)]
 pub struct Vertex {
 	position: [f32; 2],
