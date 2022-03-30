@@ -6,7 +6,7 @@ Goal 0 DONE
 
 Goal 1
 [x] Transparency
-[ ] UI, buttons and UI state
+[x] UI, buttons and UI state
 
 Goal 2
 [ ] Zoom and pan

@@ -147,6 +147,11 @@ impl WindowData {
 					if ui.button(imgui::im_str!("D"), [32.0, 32.0]) {
 						self.debug_menu = !self.debug_menu;
 					}
+					ui.same_line_with_spacing(0.0, 5.0);
+					if ui.button(imgui::im_str!("M"), [32.0, 32.0]) {
+						self.metadata_menu = !self.metadata_menu;
+					}
+					ui.separator();
 				});
 		}
 
@@ -238,9 +243,6 @@ impl WindowData {
 		// Get shader
 		let (vertex_shader, fragment_shader) =
 			shaders::get_shader(self.gl_display.get_opengl_version());
-
-		// Print OpenGl version if needed
-		//println!("{}", self.gl_display.get_opengl_version_string());
 
 		// Create program
 		let program = glium::Program::from_source(
@@ -338,7 +340,7 @@ impl WindowData {
 					} => {
 						self.action_menu = !self.action_menu;
 					}
-					_ => (),
+					_ => (self.gl_display.gl_window().window().request_redraw()),
 				}
 			}
 
@@ -428,6 +430,8 @@ impl WindowData {
 							}
 							_ => (),
 						}
+
+						self.gl_display.gl_window().window().request_redraw()
 					}
 					_ => (self.gl_display.gl_window().window().request_redraw()),
 				}
