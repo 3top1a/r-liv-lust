@@ -3,11 +3,19 @@
 
 extern crate image;
 
-// Read image file
-// replaces image::open(name);
+// Struct type
+#[derive(Copy, Clone)]
+pub struct Vertex {
+	position: [f32; 2],
+	tex_coords: [f32; 2],
+}
+glium::implement_vertex!(Vertex, position, tex_coords);
 
+// Utilities for ui.rs
 pub struct UiUtils {}
 impl UiUtils {
+	// Read image file
+	// replaces image::open(name);
 	pub fn load_texture(
 		display: &glium::Display,
 		filename: String,
@@ -40,4 +48,24 @@ impl UiUtils {
 		)
 		.unwrap())
 	}
+
+	// Quad
+	pub const QUAD: [Vertex; 4] = [
+		Vertex {
+			position: [-1.0, -1.0],
+			tex_coords: [0.0, 0.0],
+		},
+		Vertex {
+			position: [-1.0, 1.0],
+			tex_coords: [0.0, 1.0],
+		},
+		Vertex {
+			position: [1.0, 1.0],
+			tex_coords: [1.0, 1.0],
+		},
+		Vertex {
+			position: [1.0, -1.0],
+			tex_coords: [1.0, 0.0],
+		},
+	];
 }

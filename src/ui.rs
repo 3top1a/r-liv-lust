@@ -10,12 +10,6 @@ extern crate imgui_glium_renderer;
 use crate::shaders;
 use crate::utils;
 
-#[derive(Copy, Clone)]
-struct Vertex {
-	position: [f32; 2],
-	tex_coords: [f32; 2],
-}
-glium::implement_vertex!(Vertex, position, tex_coords);
 
 struct WindowData {
 	// OpenGl
@@ -205,24 +199,7 @@ impl WindowData {
 		let vertex_buffer = {
 			glium::VertexBuffer::new(
 				&self.gl_display,
-				&[
-					Vertex {
-						position: [-1.0, -1.0],
-						tex_coords: [0.0, 0.0],
-					},
-					Vertex {
-						position: [-1.0, 1.0],
-						tex_coords: [0.0, 1.0],
-					},
-					Vertex {
-						position: [1.0, 1.0],
-						tex_coords: [1.0, 1.0],
-					},
-					Vertex {
-						position: [1.0, -1.0],
-						tex_coords: [1.0, 0.0],
-					},
-				],
+				&utils::UiUtils::QUAD,
 			)
 			.unwrap()
 		};

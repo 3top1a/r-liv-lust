@@ -9,6 +9,7 @@ Goal 1
 [x] UI, buttons and UI state
 
 Goal 2
+[ ] Better windows support
 [ ] Zoom and pan
 [ ] Pixel art / logo friendly
 
