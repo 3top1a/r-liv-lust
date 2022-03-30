@@ -66,13 +66,16 @@ impl WindowData {
 		imgui_builder.style_mut().use_dark_colors();
 		imgui_builder.style_mut().window_rounding = 0.0;
 		imgui_builder.style_mut().window_border_size = 1.0;
+		imgui_builder.style_mut().alpha = 0.9;
+		imgui_builder.style_mut().window_padding = [2.0, 2.0];
+		imgui_builder.style_mut().window_title_align = [1.0, 0.5];
 
 		// Make renderer
 		let imgui_renderer =
 			imgui_glium_renderer::Renderer::init(&mut imgui_builder, &display).unwrap();
 
 		// Get image
-		let image = utils::load_texture(&display, filename).unwrap();
+		let image = utils::UiUtils::load_texture(&display, filename).unwrap();
 
 		// Return data
 		(
@@ -121,28 +124,28 @@ impl WindowData {
 				.size([350.0, 32.0], imgui::Condition::FirstUseEver)
 				.position(
 					[
-						(width as f32 / 2.0) - (ui.window_size()[0] / 2.0),
+						(width as f32 / 2.0) - (350.0 / 2.0),
 						height as f32 - 10.0 - 32.0,
 					],
 					imgui::Condition::FirstUseEver,
 				)
-				.bg_alpha(0.1)
+				.draw_background(false)
 				.scrollable(false)
 				.collapsible(false)
 				.movable(true)
 				.no_decoration()
 				.scroll_bar(false)
 				.resizable(false)
-				.always_auto_resize(true)
 				.title_bar(false)
 				.build(&ui, || {
+					ui.separator();
 					ui.same_line_with_spacing(0.0, 5.0);
 					if ui.button(imgui::im_str!("E"), [32.0, 32.0]) {
 						self.example_menu = !self.example_menu;
 					}
 					ui.same_line_with_spacing(0.0, 5.0);
 					if ui.button(imgui::im_str!("D"), [32.0, 32.0]) {
-						self.debug_menu = !self.debug_menu;
+						self.debug_menu = true;
 					}
 				});
 		}
@@ -155,7 +158,6 @@ impl WindowData {
 					[(width as f32 / 2f32) - (ui.window_size()[0] / 2.0), 10.0],
 					imgui::Condition::Always,
 				)
-				.bg_alpha(0.1)
 				.scrollable(false)
 				.collapsible(false)
 				.movable(true)
