@@ -64,7 +64,6 @@ impl WindowData {
 			.with_depth_buffer(0);
 		let display = glium::Display::new(window_builder, context_builder, &event_loop).unwrap();
 
-		//display.gl_window().window().set_title(title)
 		// Create ImGui
 		let mut imgui_builder = imgui::Context::create();
 
