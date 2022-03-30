@@ -4,13 +4,15 @@ Rust Lean Image Viewer - Fast and configurable image viewer inspired by JPEGView
 R-liv is meant to be a small, lean, fast and configurable image viewer inspired by [JPEGView by David Kleiner](https://sourceforge.net/projects/jpegview/).
 It's philosophy is similar - minimal GUI with maximal image and utility.
 
+![Screenshot](screenshot.png)
+
 ## Features
 
-...yeah
+- Support for multiple formats [^1]
+- Support for transparency
 
 ## Planned features:
 
-- Image viewing for the most common formats (JPEG, PNG, WEBP, GIF, TIFF, RAW)
 - Basic image processing with live preview
 - Saving
 - Exif reading and error checking
@@ -27,3 +29,5 @@ For powerusers, who want a image viewer that lets them do things quickly and not
 For normal users, who want a fast image viewer.
 
 For editors, taht don't want to open a fully featured editor to do something basic.
+
+[^1]: https://github.com/image-rs/image/blob/master/README.md#supported-image-formats
