@@ -10,7 +10,6 @@ extern crate imgui_glium_renderer;
 use crate::shaders;
 use crate::utils;
 
-
 struct WindowData {
 	// OpenGl
 	//gl_event_loop: glutin::event_loop::EventLoop<()>,
@@ -34,18 +33,19 @@ struct WindowData {
 impl WindowData {
 	fn new(filename: String) -> (WindowData, glium::glutin::event_loop::EventLoop<()>) {
 		// Default window size
-		let width = 1024i32;
-		let height = 768i32;
+		let width = 800i32;
+		let height = 600i32;
 
 		// Create OpenGL window
 		let event_loop = glium::glutin::event_loop::EventLoop::new();
 		let window_builder = glium::glutin::window::WindowBuilder::new()
 			.with_title("Asd")
-			.with_decorations(false)
+			.with_decorations(true)
+			.with_resizable(true)
 			.with_visible(true)
 			.with_inner_size(glium::glutin::dpi::LogicalSize::new(width, height));
 		let context_builder = glium::glutin::ContextBuilder::new()
-			.with_vsync(false)
+			.with_vsync(false) // !Vsync is broken!
 			.with_hardware_acceleration(Some(true))
 			.with_multisampling(0)
 			.with_depth_buffer(0);
@@ -70,6 +70,9 @@ impl WindowData {
 
 		// Get image
 		let image = utils::UiUtils::load_texture(&display, filename).unwrap();
+
+		// Auto resize image
+		display.gl_window().resize(glium::glutin::dpi::PhysicalSize::new(image.get_width(), image.get_height().unwrap()));
 
 		// Return data
 		(
