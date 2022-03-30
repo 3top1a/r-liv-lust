@@ -51,4 +51,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: Linux Release
-          path: target/release/r-liv
+          path: target/release/r-liv.exe
