@@ -175,7 +175,7 @@ impl WindowData {
 				matrix: self.uniform,
 				tex: self.image_texture.as_ref().unwrap().sampled()
 				.wrap_function(glium::uniforms::SamplerWrapFunction::Clamp)
-				.magnify_filter(glium::uniforms::MagnifySamplerFilter::Nearest),
+				.magnify_filter(glium::uniforms::MagnifySamplerFilter::Linear),
 			};
 
 			// Get shader
@@ -447,7 +447,7 @@ impl WindowData {
 					}
 					glium::glutin::event::WindowEvent::MouseWheel { delta, .. }  => {
 						let delta = match delta {
-                            glium::glutin::event::MouseScrollDelta::LineDelta(y, ..) => { *y },
+                            glium::glutin::event::MouseScrollDelta::LineDelta(.., y) => { *y },
                             glium::glutin::event::MouseScrollDelta::PixelDelta(d, ..) => {
 								(d.x as f32) / 13f32
 							}
