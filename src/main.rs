@@ -5,7 +5,7 @@ mod utils;
 
 fn main() {
 	// Debug
-	if settings::Settings::PRINT_DEBUG_INFO {
+	if settings::ProgramSettings::PRINT_DEBUG_INFO {
 		println!("--- R-liv v{} ---", std::env!("CARGO_PKG_VERSION"));
 		println!("ImGui v{}", imgui::dear_imgui_version());
 	}

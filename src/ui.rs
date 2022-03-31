@@ -72,7 +72,7 @@ impl WindowData {
 		// Holy shit is this ever cursed
 		let title = format!(
 			"{} - {}",
-			settings::Settings::WINDOW_TITLE,
+			settings::WindowSettings::WINDOW_TITLE,
 			std::path::Path::new(&filename)
 				.file_name()
 				.unwrap_or_default()
@@ -135,10 +135,10 @@ impl WindowData {
 				],
 				im_builder: imgui_builder,
 				im_renderer: imgui_renderer,
-				debug_menu: false,
+				debug_menu: settings::WindowSettings::DEBUG_MENU_OPEN,
 				example_menu: false,
-				metadata_menu: false,
-				action_menu: true,
+				metadata_menu: settings::WindowSettings::METADATA_MENU_OPEN,
+				action_menu: true, // No setting for this because it should always be on
 				zoom_level: 1.0,
 			},
 			event_loop,
@@ -245,11 +245,11 @@ impl WindowData {
 						ui.separator();
 						ui.same_line_with_spacing(0.0, 5.0);
 						if ui.button(imgui::im_str!("-"), [32.0, 32.0]) {
-							self.zoom_level -= 0.1;
+							self.zoom_level /= 1.2;
 						}
 						ui.same_line_with_spacing(0.0, 5.0);
 						if ui.button(imgui::im_str!("+"), [32.0, 32.0]) {
-							self.zoom_level += 0.1;
+							self.zoom_level *= 1.2;
 						}
 						ui.same_line_with_spacing(0.0, 5.0);
 						if ui.button(imgui::im_str!("D"), [32.0, 32.0]) {
