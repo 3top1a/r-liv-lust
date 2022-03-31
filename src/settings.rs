@@ -22,3 +22,11 @@ impl WindowSettings {
 	// Default: false
 	pub const METADATA_MENU_OPEN: bool = false;
 }
+
+pub struct ImageSettings {}
+impl ImageSettings {
+	// Zoom multiplier
+	// Default: x
+	pub const ZOOM_MULTIPLIER: f32 = 10.0;
+
+}

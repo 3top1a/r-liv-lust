@@ -445,11 +445,15 @@ impl WindowData {
 
 						self.gl_display.gl_window().window().request_redraw()
 					}
-					glium::glutin::event::WindowEvent::MouseWheel { delta, phase,  .. }  => {
-						/*if let glium::glutin::event::MouseScrollDelta::PixelDelta { 0: f64}
-						{
-							self.zoom_level += 0;
-						}*/
+					glium::glutin::event::WindowEvent::MouseWheel { delta, .. }  => {
+						let delta = match delta {
+                            glium::glutin::event::MouseScrollDelta::LineDelta(y, ..) => { *y },
+                            glium::glutin::event::MouseScrollDelta::PixelDelta(d, ..) => {
+								(d.x as f32) / 13f32
+							}
+                        };
+
+						self.zoom_level *= 1.0 + (delta * settings::ImageSettings::ZOOM_MULTIPLIER / 100.0);
 					}
 					_ => (self.gl_display.gl_window().window().request_redraw()),
 				}
