@@ -35,7 +35,7 @@ impl UiUtils {
 		// TODO Optimize this loading function
 		// `&iimage.into_rgba8()` Why 16 bit? Why alpha?
 		// Shouldn't the function be determined seperately?
-		// 99% of images are 8bit
+		// 40% of images are 8bit
 		// 80% of images are **not** transparent
 		// Takes ~40% of the loading time
 		let image =

@@ -32,6 +32,36 @@ struct WindowData {
 }
 
 impl WindowData {
+	fn calculate_uniform(&self, window_width: f32, window_height: f32) -> [[f32; 4]; 4]
+	{
+		let image_width = (self.image_texture.as_ref().unwrap().get_width()) as f32;
+		//? Why does height need unwrap() but width doesn't?
+		let image_height =
+			(self.image_texture.as_ref().unwrap().get_height().unwrap()) as f32;
+
+		let image_ratio = (image_width / image_height) as f32;
+		let window_ratio = window_width / window_height as f32;
+
+		// From ArturKovacs/emulsion
+		let mut scale_x = 1f32;
+		let mut scale_y = 1f32;
+
+		if image_ratio < window_ratio {
+			scale_x = ((image_ratio / window_ratio) * window_width)
+				.floor() / window_width
+		} else {
+			scale_y = ((window_ratio / image_ratio) * window_height as f32)
+				.floor() / window_height as f32
+		}
+
+		[
+			[scale_x, 0.0, 0.0, 0.0],
+			[0.0, scale_y, 0.0, 0.0],
+			[0.0, 0.0, 1.0, 0.0],
+			[0.0, 0.0, 0.0, 1.0f32],
+		]
+	}
+
 	fn new(filename: String) -> (WindowData, glium::glutin::event_loop::EventLoop<()>) {
 		// Default window size
 		let width = 800i32;
@@ -116,91 +146,144 @@ impl WindowData {
 	fn draw(&mut self) {
 		// Create render target
 		let mut target = self.gl_display.draw();
-
-		// Background
-		glium::Surface::clear_color(&mut target, 0.05, 0.05, 0.05, 1.0);
-
-		// ImGui IO
-		let framerate = self.im_builder.io().framerate;
-		let delta = self.im_builder.io().delta_time;
-		let mut imgui_io = self.im_builder.io_mut();
-
-		// Set display dimentions
-		let (width, height) = self.gl_display.get_framebuffer_dimensions();
-		imgui_io.display_size = [width as f32, height as f32];
-
-		// Make a frame
-		let ui = self.im_builder.frame();
-
-		// Buttons
-		if self.action_menu {
-			imgui::Window::new(imgui::im_str!("Buttons"))
-				.size([350.0, 32.0], imgui::Condition::FirstUseEver)
-				.position(
-					[
-						(width as f32 / 2.0) - (350.0 / 2.0),
-						height as f32 - 10.0 - 32.0,
-					],
-					imgui::Condition::FirstUseEver,
-				)
-				.draw_background(false)
-				.scrollable(false)
-				.collapsible(false)
-				.movable(true)
-				.no_decoration()
-				.scroll_bar(false)
-				.resizable(false)
-				.title_bar(false)
-				.build(&ui, || {
-					ui.separator();
-					ui.same_line_with_spacing(0.0, 5.0);
-					if ui.button(imgui::im_str!("E"), [32.0, 32.0]) {
-						self.example_menu = !self.example_menu;
-					}
-					ui.same_line_with_spacing(0.0, 5.0);
-					if ui.button(imgui::im_str!("D"), [32.0, 32.0]) {
-						self.debug_menu = !self.debug_menu;
-					}
-					ui.same_line_with_spacing(0.0, 5.0);
-					if ui.button(imgui::im_str!("M"), [32.0, 32.0]) {
-						self.metadata_menu = !self.metadata_menu;
-					}
-					ui.separator();
-				});
+		
+		// *Draw background
+		{
+			// Background
+			glium::Surface::clear_color(&mut target, 0.05, 0.05, 0.05, 1.0);
 		}
 
-		// Debug window
-		if self.debug_menu {
-			imgui::Window::new(imgui::im_str!("Debug"))
-				.size([350.0, 100.0], imgui::Condition::FirstUseEver)
-				.position(
-					[(width as f32 / 2f32) - (ui.window_size()[0] / 2.0), 10.0],
-					imgui::Condition::Always,
-				)
-				.scrollable(false)
-				.collapsible(false)
-				.movable(true)
-				.no_decoration()
-				.scroll_bar(false)
-				.resizable(false)
-				.title_bar(false)
-				.build(&ui, || {
-					ui.text("Debug menu");
-					ui.separator();
-					ui.text(format!(
-						"Free VRAM: {}MB",
-						self.gl_display
-							.get_free_video_memory()
-							.unwrap_or(usize::MIN) / 1_000_000
-					));
-					ui.text(format!("Reported FPS: {}", framerate));
-					ui.text(format!("Delta: {}", delta));
-					ui.text(format!("Calculated FPS: {}", 1.0 / delta));
-				});
-		}
+		// *Draw image and quad
+		{
+			// Make quad
+			let vertex_buffer =
+				{ glium::VertexBuffer::new(&self.gl_display, &utils::UiUtils::QUAD).unwrap() };
+			let index_buffer = glium::IndexBuffer::new(
+				&self.gl_display,
+				glium::index::PrimitiveType::TriangleStrip,
+				&[1 as u16, 2, 0, 3],
+			)
+			.unwrap();
 
-		// Example window
-		if self.example_menu {
+			//Calculate uniform
+			let size = self.gl_display.gl_window().window().inner_size();
+			self.uniform = self.calculate_uniform(size.width as f32, size.height as f32);
+
+			let uniforms = glium::uniform! {
+				matrix: self.uniform,
+				tex: self.image_texture.as_ref().unwrap().sampled()
+				.wrap_function(glium::uniforms::SamplerWrapFunction::Clamp)
+				.magnify_filter(glium::uniforms::MagnifySamplerFilter::Nearest),
+			};
+
+			// Get shader
+			let (vertex_shader, fragment_shader) =
+				shaders::get_shader(self.gl_display.get_opengl_version());
+
+			// Create program
+			let program = glium::Program::from_source(
+				&self.gl_display,
+				vertex_shader.as_str(),
+				fragment_shader.as_str(),
+				None,
+			)
+			.unwrap();
+
+			// Draw the quad
+			glium::Surface::draw(
+				&mut target,
+				&vertex_buffer,
+				&index_buffer,
+				&program,
+				&uniforms,
+				&glium::DrawParameters {
+					blend: glium::Blend::alpha_blending(),
+					dithering: true,
+					backface_culling: glium::BackfaceCullingMode::CullingDisabled,
+					..Default::default()
+				},
+			)
+			.unwrap();
+		}
+	
+		// *Draw ImGui
+		{
+			// ImGui IO
+			let framerate = self.im_builder.io().framerate;
+			let delta = self.im_builder.io().delta_time;
+			let mut imgui_io = self.im_builder.io_mut();
+
+			// Set display dimentions
+			let (width, height) = self.gl_display.get_framebuffer_dimensions();
+			imgui_io.display_size = [width as f32, height as f32];
+
+			// Make a frame
+			let ui = self.im_builder.frame();
+
+			// Buttons
+			if self.action_menu {
+				imgui::Window::new(imgui::im_str!("Buttons"))
+					.size([350.0, 32.0], imgui::Condition::FirstUseEver)
+					.position(
+						[
+							(width as f32 / 2.0) - (350.0 / 2.0),
+							height as f32 - 10.0 - 32.0,
+						],
+						imgui::Condition::FirstUseEver,
+					)
+					.draw_background(false)
+					.scrollable(false)
+					.collapsible(false)
+					.movable(true)
+					.no_decoration()
+					.scroll_bar(false)
+					.resizable(false)
+					.title_bar(false)
+					.build(&ui, || {
+						ui.separator();
+						ui.same_line_with_spacing(0.0, 5.0);
+						if ui.button(imgui::im_str!("D"), [32.0, 32.0]) {
+							self.debug_menu = !self.debug_menu;
+						}
+						ui.same_line_with_spacing(0.0, 5.0);
+						if ui.button(imgui::im_str!("M"), [32.0, 32.0]) {
+							self.metadata_menu = !self.metadata_menu;
+						}
+					});
+			}
+
+			// Debug window
+			if self.debug_menu {
+				imgui::Window::new(imgui::im_str!("Debug"))
+					.size([350.0, 100.0], imgui::Condition::FirstUseEver)
+					.position(
+						[(width as f32 / 2f32) - (ui.window_size()[0] / 2.0), 10.0],
+						imgui::Condition::Always,
+					)
+					.scrollable(false)
+					.collapsible(false)
+					.movable(true)
+					.no_decoration()
+					.scroll_bar(false)
+					.resizable(false)
+					.title_bar(false)
+					.build(&ui, || {
+						ui.text("Debug menu");
+						ui.separator();
+						ui.text(format!(
+							"Free VRAM: {}MB",
+							self.gl_display
+								.get_free_video_memory()
+								.unwrap_or(usize::MIN) / 1_000_000
+						));
+						ui.text(format!("Reported FPS: {}", framerate));
+						ui.text(format!("Delta: {}", delta));
+						ui.text(format!("Calculated FPS: {}", 1.0 / delta));
+					});
+			}
+
+			// Example window
+			if self.example_menu {
 			imgui::Window::new(imgui::im_str!("Test window"))
 				.size([300.0, 100.0], imgui::Condition::FirstUseEver)
 				.build(&ui, || {
@@ -214,55 +297,10 @@ impl WindowData {
 					ui.text("It is licensed under AGPL-3.0 License");
 				});
 		}
-
-		// Make quad
-		let vertex_buffer =
-			{ glium::VertexBuffer::new(&self.gl_display, &utils::UiUtils::QUAD).unwrap() };
-		let index_buffer = glium::IndexBuffer::new(
-			&self.gl_display,
-			glium::index::PrimitiveType::TriangleStrip,
-			&[1 as u16, 2, 0, 3],
-		)
-		.unwrap();
-
-		let uniforms = glium::uniform! {
-			matrix: self.uniform,
-			tex: self.image_texture.as_ref().unwrap().sampled()
-			.wrap_function(glium::uniforms::SamplerWrapFunction::Clamp)
-			.magnify_filter(glium::uniforms::MagnifySamplerFilter::Nearest),
-		};
-
-		// Get shader
-		let (vertex_shader, fragment_shader) =
-			shaders::get_shader(self.gl_display.get_opengl_version());
-
-		// Create program
-		let program = glium::Program::from_source(
-			&self.gl_display,
-			vertex_shader.as_str(),
-			fragment_shader.as_str(),
-			None,
-		)
-		.unwrap();
-
-		// Draw the quad
-		glium::Surface::draw(
-			&mut target,
-			&vertex_buffer,
-			&index_buffer,
-			&program,
-			&uniforms,
-			&glium::DrawParameters {
-				blend: glium::Blend::alpha_blending(),
-				dithering: true,
-				backface_culling: glium::BackfaceCullingMode::CullingDisabled,
-				..Default::default()
-			},
-		)
-		.unwrap();
-
-		// Render that ImGui frame to target
-		self.im_renderer.render(&mut target, ui.render()).unwrap();
+		
+			// Render that ImGui frame to target
+			self.im_renderer.render(&mut target, ui.render()).unwrap();
+		}
 
 		// End
 		target.finish().unwrap();
@@ -339,33 +377,7 @@ impl WindowData {
 			// Resized
 			if let glium::glutin::event::Event::WindowEvent { event, .. } = event_ref {
 				match event {
-					glium::glutin::event::WindowEvent::Resized(window_size) => {
-						let image_width = (self.image_texture.as_ref().unwrap().get_width()) as f32;
-						//? Why does height need unwrap() but width doesn't?
-						let image_height =
-							(self.image_texture.as_ref().unwrap().get_height().unwrap()) as f32;
-
-						let image_ratio = (image_width / image_height) as f32;
-						let window_ratio = window_size.width as f32 / window_size.height as f32;
-
-						// From ArturKovacs/emulsion
-						let mut scale_x = 1f32;
-						let mut scale_y = 1f32;
-
-						if image_ratio < window_ratio {
-							scale_x = ((image_ratio / window_ratio) * window_size.width as f32)
-								.floor() / window_size.width as f32
-						} else {
-							scale_y = ((window_ratio / image_ratio) * window_size.height as f32)
-								.floor() / window_size.height as f32
-						}
-
-						self.uniform = [
-							[scale_x, 0.0, 0.0, 0.0],
-							[0.0, scale_y, 0.0, 0.0],
-							[0.0, 0.0, 1.0, 0.0],
-							[0.0, 0.0, 0.0, 1.0f32],
-						];
+					glium::glutin::event::WindowEvent::Resized(..) => {
 						self.gl_display.gl_window().window().request_redraw();
 					}
 					_ => (),
