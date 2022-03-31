@@ -28,5 +28,4 @@ impl ImageSettings {
 	// Zoom multiplier
 	// Default: x
 	pub const ZOOM_MULTIPLIER: f32 = 10.0;
-
 }

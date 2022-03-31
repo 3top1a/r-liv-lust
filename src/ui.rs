@@ -11,6 +11,8 @@ use crate::settings;
 use crate::shaders;
 use crate::utils;
 
+use cgmath::{Vector2, Matrix4};
+
 struct WindowData {
 	// OpenGl
 	//gl_event_loop: glutin::event_loop::EventLoop<()>,
@@ -23,7 +25,9 @@ struct WindowData {
 
 	// Texture
 	image_texture: Option<glium::texture::SrgbTexture2d>,
-	zoom_level: f32,
+	zoom_level: f32,    // Zoom
+	offset: (f32, f32), // Pan
+	last_offset: (f32, f32), // Pan detection
 
 	// UI
 	debug_menu: bool,
@@ -33,12 +37,10 @@ struct WindowData {
 }
 
 impl WindowData {
-	fn calculate_uniform(&self, window_width: f32, window_height: f32) -> [[f32; 4]; 4]
-	{
+	fn calculate_uniform(&self, window_width: f32, window_height: f32) -> [[f32; 4]; 4] {
 		let image_width = (self.image_texture.as_ref().unwrap().get_width()) as f32;
 		//? Why does height need unwrap() but width doesn't?
-		let image_height =
-			(self.image_texture.as_ref().unwrap().get_height().unwrap()) as f32;
+		let image_height = (self.image_texture.as_ref().unwrap().get_height().unwrap()) as f32;
 
 		let image_ratio = (image_width / image_height) as f32;
 		let window_ratio = window_width / window_height as f32;
@@ -48,19 +50,26 @@ impl WindowData {
 		let mut scale_y = 1f32;
 
 		if image_ratio < window_ratio {
-			scale_x = ((image_ratio / window_ratio) * window_width)
-				.floor() / window_width
+			scale_x = ((image_ratio / window_ratio) * window_width).floor() / window_width
 		} else {
-			scale_y = ((window_ratio / image_ratio) * window_height as f32)
-				.floor() / window_height as f32
+			scale_y =
+				((window_ratio / image_ratio) * window_height as f32).floor() / window_height as f32
 		}
 
+		let transform = Matrix4::from_translation(
+			cgmath::Vector3::new(self.offset.0 / window_width, self.offset.1 / window_height, 0.0) / self.zoom_level
+		);
+		let transform = Matrix4::from_nonuniform_scale(scale_x, scale_y, 1.0) * transform;
+		let transform = Matrix4::from_scale(self.zoom_level) * transform;
+
 		[
-			[scale_x * self.zoom_level, 0.0, 0.0, 0.0],
-			[0.0, scale_y * self.zoom_level, 0.0, 0.0],
+			[(scale_x + self.offset.0) * self.zoom_level, 0.0, 0.0, 0.0],
+			[0.0, (scale_y + self.offset.1) * self.zoom_level, 0.0, 0.0],
 			[0.0, 0.0, 1.0, 0.0],
 			[0.0, 0.0, 0.0, 1.0f32],
-		]
+		];
+
+		Into::<[[f32; 4]; 4]>::into(transform)
 	}
 
 	fn new(filename: String) -> (WindowData, glium::glutin::event_loop::EventLoop<()>) {
@@ -140,6 +149,8 @@ impl WindowData {
 				metadata_menu: settings::WindowSettings::METADATA_MENU_OPEN,
 				action_menu: true, // No setting for this because it should always be on
 				zoom_level: 1.0,
+				offset: (0.0, 0.0),
+				last_offset: (-100000.0, -100000.0),
 			},
 			event_loop,
 		)
@@ -148,7 +159,7 @@ impl WindowData {
 	fn draw(&mut self) {
 		// Create render target
 		let mut target = self.gl_display.draw();
-		
+
 		// *Draw background
 		{
 			// Background
@@ -207,7 +218,7 @@ impl WindowData {
 			)
 			.unwrap();
 		}
-	
+
 		// *Draw ImGui
 		{
 			// ImGui IO
@@ -294,20 +305,20 @@ impl WindowData {
 
 			// Example window
 			if self.example_menu {
-			imgui::Window::new(imgui::im_str!("Test window"))
-				.size([300.0, 100.0], imgui::Condition::FirstUseEver)
-				.build(&ui, || {
-					ui.text("Hello world!");
-					ui.text("This...is...r-liv!");
-					ui.separator();
-					ui.bullet();
-					ui.button(imgui::im_str!("Test"), [60.0, 20.0]);
-					ui.separator();
-					ui.text("R-liv is made by 3top1a with love!");
-					ui.text("It is licensed under AGPL-3.0 License");
-				});
-		}
-		
+				imgui::Window::new(imgui::im_str!("Test window"))
+					.size([300.0, 100.0], imgui::Condition::FirstUseEver)
+					.build(&ui, || {
+						ui.text("Hello world!");
+						ui.text("This...is...r-liv!");
+						ui.separator();
+						ui.bullet();
+						ui.button(imgui::im_str!("Test"), [60.0, 20.0]);
+						ui.separator();
+						ui.text("R-liv is made by 3top1a with love!");
+						ui.text("It is licensed under AGPL-3.0 License");
+					});
+			}
+
 			// Render that ImGui frame to target
 			self.im_renderer.render(&mut target, ui.render()).unwrap();
 		}
@@ -405,6 +416,15 @@ impl WindowData {
 				match event {
 					glium::glutin::event::WindowEvent::CursorMoved { position, .. } => {
 						imgui_io.mouse_pos = [position.x as f32, position.y as f32];
+						
+						if imgui_io.mouse_down[2] && self.last_offset.0 != -100000.0
+						{
+							self.offset.0 += (position.x as f32) - self.last_offset.0;
+							self.offset.1 += (position.y as f32) - self.last_offset.1;
+						}
+
+						self.last_offset.0 = position.x as f32;
+						self.last_offset.1 = position.y as f32;
 					}
 					glium::glutin::event::WindowEvent::MouseInput { state, button, .. } => {
 						let mut s = false;
@@ -445,15 +465,16 @@ impl WindowData {
 
 						self.gl_display.gl_window().window().request_redraw()
 					}
-					glium::glutin::event::WindowEvent::MouseWheel { delta, .. }  => {
+					glium::glutin::event::WindowEvent::MouseWheel { delta, .. } => {
 						let delta = match delta {
-                            glium::glutin::event::MouseScrollDelta::LineDelta(.., y) => { *y },
-                            glium::glutin::event::MouseScrollDelta::PixelDelta(d, ..) => {
+							glium::glutin::event::MouseScrollDelta::LineDelta(.., y) => *y,
+							glium::glutin::event::MouseScrollDelta::PixelDelta(d, ..) => {
 								(d.x as f32) / 13f32
 							}
-                        };
+						};
 
-						self.zoom_level *= 1.0 + (delta * settings::ImageSettings::ZOOM_MULTIPLIER / 100.0);
+						self.zoom_level *=
+							1.0 + (delta * settings::ImageSettings::ZOOM_MULTIPLIER / 100.0);
 					}
 					_ => (self.gl_display.gl_window().window().request_redraw()),
 				}

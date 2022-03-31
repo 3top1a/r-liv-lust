@@ -38,8 +38,10 @@ impl UiUtils {
 		// 40% of images are 8bit
 		// 80% of images are **not** transparent
 		// Takes ~40% of the loading time
-		let image =
-			glium::texture::RawImage2d::from_raw_rgba_reversed(&iimage.into_rgba16().to_vec(), size);
+		let image = glium::texture::RawImage2d::from_raw_rgba_reversed(
+			&iimage.into_rgba16().to_vec(),
+			size,
+		);
 
 		Ok(glium::texture::SrgbTexture2d::with_mipmaps(
 			display,

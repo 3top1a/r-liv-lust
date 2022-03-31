@@ -9,10 +9,11 @@ Goal 1
 [x] UI, buttons and UI state
 
 Goal 2
-[ ] Better windows support
+[x] Better windows support
 [ ] Zoom and pan
 [ ] Pixel art / logo friendly
 [ ] Error popups
+[ ] Splash screen
 
 Goal 3
 [ ] Window stuff
@@ -30,4 +31,5 @@ Goal 5
 
 Goal ???
 [ ] Transition to more low level OpenGL
+[ ] GIF support
 [ ] ???
