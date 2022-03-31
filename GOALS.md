@@ -12,6 +12,7 @@ Goal 2
 [ ] Better windows support
 [ ] Zoom and pan
 [ ] Pixel art / logo friendly
+[ ] Error popups
 
 Goal 3
 [ ] Window stuff

@@ -23,6 +23,7 @@ struct WindowData {
 
 	// Texture
 	image_texture: Option<glium::texture::SrgbTexture2d>,
+	zoom_level: f32,
 
 	// UI
 	debug_menu: bool,
@@ -55,8 +56,8 @@ impl WindowData {
 		}
 
 		[
-			[scale_x, 0.0, 0.0, 0.0],
-			[0.0, scale_y, 0.0, 0.0],
+			[scale_x * self.zoom_level, 0.0, 0.0, 0.0],
+			[0.0, scale_y * self.zoom_level, 0.0, 0.0],
 			[0.0, 0.0, 1.0, 0.0],
 			[0.0, 0.0, 0.0, 1.0f32],
 		]
@@ -90,7 +91,7 @@ impl WindowData {
 		let context_builder = glium::glutin::ContextBuilder::new()
 			.with_vsync(false) // !Vsync is broken!
 			.with_hardware_acceleration(Some(true))
-			.with_multisampling(0)
+			.with_multisampling(2)
 			.with_depth_buffer(0);
 		let display = glium::Display::new(window_builder, context_builder, &event_loop).unwrap();
 
@@ -138,6 +139,7 @@ impl WindowData {
 				example_menu: false,
 				metadata_menu: false,
 				action_menu: true,
+				zoom_level: 1.0,
 			},
 			event_loop,
 		)
@@ -394,8 +396,6 @@ impl WindowData {
 			if let glium::glutin::event::Event::WindowEvent { event, .. } = event_ref {
 				match event {
 					glium::glutin::event::WindowEvent::CursorMoved { position, .. } => {
-						// TODO Better mouse movement
-						// This has a lot of delay when dragging
 						imgui_io.mouse_pos = [position.x as f32, position.y as f32];
 					}
 					glium::glutin::event::WindowEvent::MouseInput { state, button, .. } => {
@@ -436,6 +436,12 @@ impl WindowData {
 						}
 
 						self.gl_display.gl_window().window().request_redraw()
+					}
+					glium::glutin::event::WindowEvent::MouseWheel { delta, phase,  .. }  => {
+						/*if let glium::glutin::event::MouseScrollDelta::PixelDelta { 0: f64}
+						{
+							self.zoom_level += 0;
+						}*/
 					}
 					_ => (self.gl_display.gl_window().window().request_redraw()),
 				}
