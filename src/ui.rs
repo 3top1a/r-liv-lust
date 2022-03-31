@@ -244,6 +244,14 @@ impl WindowData {
 					.build(&ui, || {
 						ui.separator();
 						ui.same_line_with_spacing(0.0, 5.0);
+						if ui.button(imgui::im_str!("-"), [32.0, 32.0]) {
+							self.zoom_level -= 0.1;
+						}
+						ui.same_line_with_spacing(0.0, 5.0);
+						if ui.button(imgui::im_str!("+"), [32.0, 32.0]) {
+							self.zoom_level += 0.1;
+						}
+						ui.same_line_with_spacing(0.0, 5.0);
 						if ui.button(imgui::im_str!("D"), [32.0, 32.0]) {
 							self.debug_menu = !self.debug_menu;
 						}

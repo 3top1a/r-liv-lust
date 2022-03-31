@@ -1,5 +1,5 @@
 // utils.rs
-// Goal: Provide faster code without complicating the code
+// Goal: Take the filth from important classes to simplify the code
 
 extern crate image;
 
@@ -39,7 +39,7 @@ impl UiUtils {
 		// 80% of images are **not** transparent
 		// Takes ~40% of the loading time
 		let image =
-			glium::texture::RawImage2d::from_raw_rgba_reversed(&iimage.into_rgba8().to_vec(), size);
+			glium::texture::RawImage2d::from_raw_rgba_reversed(&iimage.into_rgba16().to_vec(), size);
 
 		Ok(glium::texture::SrgbTexture2d::with_mipmaps(
 			display,
