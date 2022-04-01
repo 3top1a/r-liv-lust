@@ -257,18 +257,22 @@ impl WindowData {
 						ui.same_line_with_spacing(0.0, 5.0);
 						if ui.button(imgui::im_str!("-"), [32.0, 32.0]) {
 							self.zoom_level /= 1.2;
+							self.gl_display.gl_window().window().request_redraw();
 						}
 						ui.same_line_with_spacing(0.0, 5.0);
 						if ui.button(imgui::im_str!("+"), [32.0, 32.0]) {
 							self.zoom_level *= 1.2;
+							self.gl_display.gl_window().window().request_redraw();
 						}
 						ui.same_line_with_spacing(0.0, 5.0);
 						if ui.button(imgui::im_str!("D"), [32.0, 32.0]) {
 							self.debug_menu = !self.debug_menu;
+							self.gl_display.gl_window().window().request_redraw();
 						}
 						ui.same_line_with_spacing(0.0, 5.0);
 						if ui.button(imgui::im_str!("M"), [32.0, 32.0]) {
 							self.metadata_menu = !self.metadata_menu;
+							self.gl_display.gl_window().window().request_redraw();
 						}
 					});
 			}
