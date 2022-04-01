@@ -10,7 +10,7 @@ Goal 1
 
 Goal 2
 [x] Better windows support
-[ ] Zoom and pan
+[x] Zoom and pan
 [ ] Pixel art / logo friendly
 [ ] Error popups
 [ ] Splash screen

@@ -60,7 +60,7 @@ impl WindowData {
 		let transform = Matrix4::from_translation(
 			cgmath::Vector3::new(
 				(window_width * scale_x / 2.0 + self.offset.0) / (window_width * scale_x / 2.0) - 1.0,
-				(window_height * scale_y / 2.0 - self.offset.1) / (window_height * scale_y / 2.0) - 1.0,
+				(window_height / 2.0 - self.offset.1) / (window_height / 2.0) - 1.0,
 				0.0)
 		) * transform; // Offset
 		let transform = Matrix4::from_scale(self.zoom_level) * transform; // Zoom
