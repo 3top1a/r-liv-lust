@@ -11,7 +11,7 @@ use crate::settings;
 use crate::shaders;
 use crate::utils;
 
-use cgmath::{Vector2, Matrix4};
+use cgmath::{Matrix4};
 
 struct WindowData {
 	// OpenGl
