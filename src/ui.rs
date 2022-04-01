@@ -11,7 +11,7 @@ use crate::settings;
 use crate::shaders;
 use crate::utils;
 
-use cgmath::{Matrix4};
+use cgmath::Matrix4;
 
 struct WindowData {
 	// OpenGl
@@ -25,11 +25,15 @@ struct WindowData {
 
 	// Texture
 	image_texture: Option<glium::texture::SrgbTexture2d>,
-	zoom_level: f32,    // Zoom
+	zoom_level: f32, // Zoom
+	// Multiplier for the uniform
 	offset: (f32, f32), // Pan
-	last_offset: (f32, f32), // Pan detection
+	// Both are in relative pixels from the center of the image
+	// Also .1 needs to be reversed
+	last_offset: (f32, f32), // Last Pan
 
 	// UI
+	// These are just toggles for each individual windows
 	debug_menu: bool,
 	example_menu: bool,
 	metadata_menu: bool,
@@ -56,21 +60,16 @@ impl WindowData {
 				((window_ratio / image_ratio) * window_height as f32).floor() / window_height as f32
 		}
 
-		let transform = Matrix4::from_nonuniform_scale(scale_x, scale_y, 1.0); // Make just the scales transform
-		let transform = Matrix4::from_translation(
-			cgmath::Vector3::new(
-				(window_width * scale_x / 2.0 + self.offset.0) / (window_width * scale_x / 2.0) - 1.0,
-				(window_height / 2.0 - self.offset.1) / (window_height / 2.0) - 1.0,
-				0.0)
-		) * transform; // Offset
-		let transform = Matrix4::from_scale(self.zoom_level) * transform; // Zoom
-
-		[
-			[(scale_x + self.offset.0) * self.zoom_level, 0.0, 0.0, 0.0],
-			[0.0, (scale_y + self.offset.1) * self.zoom_level, 0.0, 0.0],
-			[0.0, 0.0, 1.0, 0.0],
-			[0.0, 0.0, 0.0, 1.0f32],
-		];
+		// Make just the scales transform
+		let transform = Matrix4::from_nonuniform_scale(scale_x, scale_y, 1.0);
+		// Pan
+		let transform = Matrix4::from_translation(cgmath::Vector3::new(
+			(window_width * scale_x / 2.0 + self.offset.0) / (window_width * scale_x / 2.0) - 1.0,
+			(window_height / 2.0 - self.offset.1) / (window_height / 2.0) - 1.0,
+			0.0,
+		)) * transform;
+		// Zoom
+		let transform = Matrix4::from_scale(self.zoom_level) * transform;
 
 		Into::<[[f32; 4]; 4]>::into(transform)
 	}
@@ -426,9 +425,8 @@ impl WindowData {
 				match event {
 					glium::glutin::event::WindowEvent::CursorMoved { position, .. } => {
 						imgui_io.mouse_pos = [position.x as f32, position.y as f32];
-						
-						if imgui_io.mouse_down[2] && self.last_offset.0 != -100000.0
-						{
+
+						if imgui_io.mouse_down[2] && self.last_offset.0 != -100000.0 {
 							self.offset.0 += (position.x as f32) - self.last_offset.0;
 							self.offset.1 += (position.y as f32) - self.last_offset.1;
 						}
@@ -488,7 +486,7 @@ impl WindowData {
 						self.zoom_level *=
 							1.0 + (delta * settings::ImageSettings::ZOOM_MULTIPLIER / 100.0);
 
-						// Somehow you can zoom into australia 
+						// Somehow you can zoom into australia
 						self.zoom_level = self.zoom_level.abs();
 
 						self.gl_display.gl_window().window().request_redraw();
