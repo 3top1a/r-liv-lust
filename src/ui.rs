@@ -366,6 +366,7 @@ impl WindowData {
 						..
 					} => {
 						self.debug_menu = !self.debug_menu;
+						self.gl_display.gl_window().window().request_redraw();
 					}
 					// If Home **pressed**
 					glium::glutin::event::WindowEvent::KeyboardInput {
@@ -378,6 +379,7 @@ impl WindowData {
 						..
 					} => {
 						self.example_menu = !self.example_menu;
+						self.gl_display.gl_window().window().request_redraw();
 					}
 					// If space **pressed**
 					glium::glutin::event::WindowEvent::KeyboardInput {
@@ -390,8 +392,9 @@ impl WindowData {
 						..
 					} => {
 						self.action_menu = !self.action_menu;
+						self.gl_display.gl_window().window().request_redraw();
 					}
-					_ => (self.gl_display.gl_window().window().request_redraw()),
+					_ => (),
 				}
 			}
 
