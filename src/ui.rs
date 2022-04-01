@@ -425,6 +425,8 @@ impl WindowData {
 
 						self.last_offset.0 = position.x as f32;
 						self.last_offset.1 = position.y as f32;
+
+						self.gl_display.gl_window().window().request_redraw();
 					}
 					glium::glutin::event::WindowEvent::MouseInput { state, button, .. } => {
 						let mut s = false;
@@ -463,7 +465,7 @@ impl WindowData {
 							_ => (),
 						}
 
-						self.gl_display.gl_window().window().request_redraw()
+						self.gl_display.gl_window().window().request_redraw();
 					}
 					glium::glutin::event::WindowEvent::MouseWheel { delta, .. } => {
 						let delta = match delta {
@@ -476,9 +478,12 @@ impl WindowData {
 						self.zoom_level *=
 							1.0 + (delta * settings::ImageSettings::ZOOM_MULTIPLIER / 100.0);
 
+						// Somehow you can zoom into australia 
 						self.zoom_level = self.zoom_level.abs();
+
+						self.gl_display.gl_window().window().request_redraw();
 					}
-					_ => (self.gl_display.gl_window().window().request_redraw()),
+					_ => (),
 				}
 			}
 			std::mem::drop(imgui_io);
