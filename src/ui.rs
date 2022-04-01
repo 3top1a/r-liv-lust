@@ -56,11 +56,14 @@ impl WindowData {
 				((window_ratio / image_ratio) * window_height as f32).floor() / window_height as f32
 		}
 
+		let transform = Matrix4::from_nonuniform_scale(scale_x, scale_y, 1.0); // Make just the scales transform
 		let transform = Matrix4::from_translation(
-			cgmath::Vector3::new(self.offset.0 / window_width, -self.offset.1 / window_height, 0.0)
-		);
-		let transform = Matrix4::from_nonuniform_scale(scale_x, scale_y, 1.0) * transform;
-		let transform = Matrix4::from_scale(self.zoom_level) * transform;
+			cgmath::Vector3::new(
+				(window_width * scale_x / 2.0 + self.offset.0) / (window_width * scale_x / 2.0) - 1.0,
+				(window_height * scale_y / 2.0 - self.offset.1) / (window_height * scale_y / 2.0) - 1.0,
+				0.0)
+		) * transform; // Offset
+		let transform = Matrix4::from_scale(self.zoom_level) * transform; // Zoom
 
 		[
 			[(scale_x + self.offset.0) * self.zoom_level, 0.0, 0.0, 0.0],
