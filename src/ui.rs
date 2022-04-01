@@ -11,7 +11,7 @@ use crate::settings;
 use crate::shaders;
 use crate::utils;
 
-use cgmath::{Vector2, Matrix4};
+use cgmath::{Matrix4};
 
 struct WindowData {
 	// OpenGl
@@ -475,6 +475,8 @@ impl WindowData {
 
 						self.zoom_level *=
 							1.0 + (delta * settings::ImageSettings::ZOOM_MULTIPLIER / 100.0);
+
+						self.zoom_level = self.zoom_level.abs();
 					}
 					_ => (self.gl_display.gl_window().window().request_redraw()),
 				}
