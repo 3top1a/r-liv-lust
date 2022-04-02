@@ -64,7 +64,9 @@ impl WindowData {
 		let transform = Matrix4::from_nonuniform_scale(scale_x, scale_y, 1.0);
 		// Pan
 		let transform = Matrix4::from_translation(cgmath::Vector3::new(
-			(window_width * scale_x / 2.0 + self.offset.0 / self.zoom_level) / (window_width * scale_x / 2.0) - 1.0,
+			(window_width * scale_x / 2.0 + self.offset.0 / self.zoom_level)
+				/ (window_width * scale_x / 2.0)
+				- 1.0,
 			(window_height / 2.0 - self.offset.1 / self.zoom_level) / (window_height / 2.0) - 1.0,
 			0.0,
 		)) * transform;
