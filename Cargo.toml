@@ -1,19 +1,27 @@
 [package]
 name = "r-liv"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 authors = ["3top1a<3top1a.official@gmail.com>"]
 categories = ["image-viewer", "viewer", "image"]
 repository = "https://github.com/3top1a/r-liv"
 license-file = "LICENSE"
+build = "src/build.rs"
+
+[target.'cfg(windows)'.build-dependencies]
+winres = "0.1"
 
 [profile.release]
 lto = true 
 codegen-units = 1
-opt-level = "z"   
+opt-level = "z"
 panic = 'abort'
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[package.metadata.winres]
+OriginalFilename = "r-liv.exe"
+LegalCopyright = "Copyright 3top1a © 2022"
+ProductName = "R-liv"
+FileDescription = "Rust Lean Image Viewer - Fast and configurable image viewer inspired by JPEGView by David Kleiner"
 
 [dependencies]
 
