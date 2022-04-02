@@ -2,6 +2,10 @@
 name = "r-liv"
 version = "0.1.0"
 edition = "2021"
+authors = ["3top1a<3top1a.official@gmail.com>"]
+categories = ["image-viewer", "viewer", "image"]
+repository = "https://github.com/3top1a/r-liv"
+license-file = "LICENSE"
 
 [profile.release]
 lto = true 
@@ -17,3 +21,4 @@ glium = "0.29.0"
 imgui = "0.7.0"
 imgui-glium-renderer = "0.7.0"
 image = "0.24.1"
+cgmath = "0.18.0"

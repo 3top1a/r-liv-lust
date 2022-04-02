@@ -1,11 +1,14 @@
+mod settings;
 mod shaders;
 mod ui;
 mod utils;
 
 fn main() {
 	// Debug
-	println!("--- R-liv v{} ---", std::env!("CARGO_PKG_VERSION"));
-	println!("ImGui v{}", imgui::dear_imgui_version());
+	if settings::ProgramSettings::PRINT_DEBUG_INFO {
+		println!("--- R-liv v{} ---", std::env!("CARGO_PKG_VERSION"));
+		println!("ImGui v{}", imgui::dear_imgui_version());
+	}
 
 	// Argument parsing
 

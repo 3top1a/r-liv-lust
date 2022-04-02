@@ -1,13 +1,21 @@
 // utils.rs
-// Goal: Provide faster code without complicating the code
+// Goal: Take the filth from important classes to simplify the code
 
 extern crate image;
 
-// Read image file
-// replaces image::open(name);
+// Vertex type
+#[derive(Copy, Clone)]
+pub struct Vertex {
+	position: [f32; 2],
+	tex_coords: [f32; 2],
+}
+glium::implement_vertex!(Vertex, position, tex_coords);
 
+// Utilities for ui.rs
 pub struct UiUtils {}
 impl UiUtils {
+	// Read image file
+	// replaces image::open(name);
 	pub fn load_texture(
 		display: &glium::Display,
 		filename: String,
@@ -27,11 +35,13 @@ impl UiUtils {
 		// TODO Optimize this loading function
 		// `&iimage.into_rgba8()` Why 16 bit? Why alpha?
 		// Shouldn't the function be determined seperately?
-		// 99% of images are 8bit
+		// 40% of images are 8bit
 		// 80% of images are **not** transparent
 		// Takes ~40% of the loading time
-		let image =
-			glium::texture::RawImage2d::from_raw_rgba_reversed(&iimage.into_rgba8().to_vec(), size);
+		let image = glium::texture::RawImage2d::from_raw_rgba_reversed(
+			&iimage.into_rgba16().to_vec(),
+			size,
+		);
 
 		Ok(glium::texture::SrgbTexture2d::with_mipmaps(
 			display,
@@ -40,4 +50,24 @@ impl UiUtils {
 		)
 		.unwrap())
 	}
+
+	// Quad
+	pub const QUAD: [Vertex; 4] = [
+		Vertex {
+			position: [-1.0, -1.0],
+			tex_coords: [0.0, 0.0],
+		},
+		Vertex {
+			position: [-1.0, 1.0],
+			tex_coords: [0.0, 1.0],
+		},
+		Vertex {
+			position: [1.0, 1.0],
+			tex_coords: [1.0, 1.0],
+		},
+		Vertex {
+			position: [1.0, -1.0],
+			tex_coords: [1.0, 0.0],
+		},
+	];
 }
