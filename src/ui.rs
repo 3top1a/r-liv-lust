@@ -75,14 +75,39 @@ impl WindowData {
 
 		// Make just the scales transform
 		let transform = Matrix4::from_nonuniform_scale(scale_x, scale_y, 1.0);
+
 		// Pan
+		// Holy shit this is *the* worst thing I've ever written.
+		// It's goal is to offset the matrix.
+		// *Oh and x needs to be reversed
+		// The result we are looking for is f(image width in px, 0) -> (1,0)
+		// and (0, image height in px) -> (1,0).
+		// The basic is this:
+			// (window_width / 2.0 + self.offset.0) / (window_width / 2.0)
+		// BUT the center is 0.0 so
+			// (image_size_px.0 + self.offset.0) / (image_size_px.0) - 1.0
+		// BUT panning doesn't work correctly when zoomed out
+			// (image_size_px.0 * self.zoom_level + self.offset.0) / (image_size_px.0 * self.zoom_level) - 1.0
+		// BUT when zooming in again it zooms into the center but I don't care enough
+		// TODO
+
+		let image_size_px = (
+			window_width / 2.0,
+			window_height / 2.0, //? For some reason removing / scale_y is better?
+		);
+
+		let offset_x =
+		(image_size_px.0 * self.zoom_level + self.offset.0) / (image_size_px.0 * self.zoom_level);
+
+		let offset_y = 
+		(image_size_px.1 * self.zoom_level + self.offset.1) / (image_size_px.1 * self.zoom_level);
+
 		let transform = Matrix4::from_translation(cgmath::Vector3::new(
-			(window_width * scale_x / 2.0 + self.offset.0 / self.zoom_level)
-				/ (window_width * scale_x / 2.0)
-				- 1.0,
-			(window_height / 2.0 - self.offset.1 / self.zoom_level) / (window_height / 2.0) - 1.0,
+			offset_x - 1.0,
+			-(offset_y - 1.0),
 			0.0,
 		)) * transform;
+		
 		// Zoom
 		let transform = Matrix4::from_scale(self.zoom_level) * transform;
 
@@ -199,17 +224,20 @@ impl WindowData {
 			let size = self.gl_display.gl_window().window().inner_size();
 			self.uniform = self.calculate_uniform(size.width as f32, size.height as f32);
 
-			let sample = if self.texel_size() >= 6.0
-			{
-				self.image_texture.as_ref().unwrap().sampled()
-				.wrap_function(glium::uniforms::SamplerWrapFunction::BorderClamp)
-				.magnify_filter(glium::uniforms::MagnifySamplerFilter::Nearest)
-			}
-			else
-			{
-				self.image_texture.as_ref().unwrap().sampled()
-				.wrap_function(glium::uniforms::SamplerWrapFunction::BorderClamp)
-				.magnify_filter(glium::uniforms::MagnifySamplerFilter::Linear)
+			let sample = if self.texel_size() >= 6.0 {
+				self.image_texture
+					.as_ref()
+					.unwrap()
+					.sampled()
+					.wrap_function(glium::uniforms::SamplerWrapFunction::BorderClamp)
+					.magnify_filter(glium::uniforms::MagnifySamplerFilter::Nearest)
+			} else {
+				self.image_texture
+					.as_ref()
+					.unwrap()
+					.sampled()
+					.wrap_function(glium::uniforms::SamplerWrapFunction::BorderClamp)
+					.magnify_filter(glium::uniforms::MagnifySamplerFilter::Linear)
 			};
 
 			let uniforms = glium::uniform! {
@@ -282,6 +310,13 @@ impl WindowData {
 					.title_bar(false)
 					.build(&ui, || {
 						ui.separator();
+						ui.same_line_with_spacing(0.0, 5.0);
+						if ui.button(imgui::im_str!("⅟"), [32.0, 32.0]) {
+							self.offset = (0.0, 0.0);
+							self.zoom_level = 1.0;
+							self.last_offset = (0.0, 0.0);
+							self.gl_display.gl_window().window().request_redraw();
+						}
 						ui.same_line_with_spacing(0.0, 5.0);
 						if ui.button(imgui::im_str!("-"), [32.0, 32.0]) {
 							self.zoom_level /= 1.2;
@@ -514,6 +549,12 @@ impl WindowData {
 
 						// Somehow you can zoom into australia
 						self.zoom_level = self.zoom_level.abs();
+
+						self.zoom_level = self.zoom_level.max(
+							0.01
+						).min(
+							100.0
+						);
 
 						self.gl_display.gl_window().window().request_redraw();
 					}

@@ -24,10 +24,10 @@ And I want to learn Rust.
 
 ## And for who?
 
-For normal users, who want a fast image viewer.
-
 For powerusers, who want a image viewer that lets them do things quickly and not impact performance.
 
-For editors, taht don't want to open a fully featured editor to do something basic.
+For normal users, who want a fast image viewer.
+
+For editors, that don't want to open a fully featured editor to do something basic like flipping or rotating an image.
 
 [^1]: https://github.com/image-rs/image/blob/master/README.md#supported-image-formats

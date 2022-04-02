@@ -12,7 +12,7 @@ Goal 2
 [x] Better windows support
 [x] Zoom and pan
 [x] Pixel art / logo friendly
-[ ] Cap zoom
+[x] Cap zoom
 
 Goal 3
 [ ] Splash screen
