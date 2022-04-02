@@ -199,11 +199,22 @@ impl WindowData {
 			let size = self.gl_display.gl_window().window().inner_size();
 			self.uniform = self.calculate_uniform(size.width as f32, size.height as f32);
 
+			let sample = if self.texel_size() >= 6.0
+			{
+				self.image_texture.as_ref().unwrap().sampled()
+				.wrap_function(glium::uniforms::SamplerWrapFunction::BorderClamp)
+				.magnify_filter(glium::uniforms::MagnifySamplerFilter::Nearest)
+			}
+			else
+			{
+				self.image_texture.as_ref().unwrap().sampled()
+				.wrap_function(glium::uniforms::SamplerWrapFunction::BorderClamp)
+				.magnify_filter(glium::uniforms::MagnifySamplerFilter::Linear)
+			};
+
 			let uniforms = glium::uniform! {
 				matrix: self.uniform,
-				tex: self.image_texture.as_ref().unwrap().sampled()
-				.wrap_function(glium::uniforms::SamplerWrapFunction::Clamp)
-				.magnify_filter(glium::uniforms::MagnifySamplerFilter::Linear),
+				tex: sample,
 			};
 
 			// Get shader

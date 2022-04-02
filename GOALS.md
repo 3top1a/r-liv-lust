@@ -11,7 +11,7 @@ Goal 1
 Goal 2
 [x] Better windows support
 [x] Zoom and pan
-[ ] Pixel art / logo friendly
+[x] Pixel art / logo friendly
 [ ] Cap zoom
 
 Goal 3
