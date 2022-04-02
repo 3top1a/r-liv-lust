@@ -10,6 +10,7 @@ It's philosophy is similar - minimal GUI with maximal image and utility.
 
 - Support for multiple formats [^1]
 - Support for transparency
+- Pixel art friendly
 
 ## Planned features:
 
