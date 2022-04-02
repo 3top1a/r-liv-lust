@@ -12,10 +12,11 @@ Goal 2
 [x] Better windows support
 [x] Zoom and pan
 [ ] Pixel art / logo friendly
-[ ] Error popups
-[ ] Splash screen
+[ ] Cap zoom
 
 Goal 3
+[ ] Splash screen
+[ ] Error popups
 [ ] Window stuff
     [ ] Resize screen on zoom when not in fullscreen
 [ ] Show metadata

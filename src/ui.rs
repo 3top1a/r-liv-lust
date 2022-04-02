@@ -41,6 +41,19 @@ struct WindowData {
 }
 
 impl WindowData {
+	fn texel_size(&self) -> f32 {
+		let window_size = self.gl_display.gl_window().window().inner_size();
+
+		(window_size.width.min(window_size.height) as f32
+			/ self
+				.image_texture
+				.as_ref()
+				.unwrap()
+				.width()
+				.max(self.image_texture.as_ref().unwrap().height()) as f32)
+			* self.zoom_level
+	}
+
 	fn calculate_uniform(&self, window_width: f32, window_height: f32) -> [[f32; 4]; 4] {
 		let image_width = (self.image_texture.as_ref().unwrap().get_width()) as f32;
 		//? Why does height need unwrap() but width doesn't?
