@@ -18,6 +18,30 @@ It's philosophy is similar - minimal GUI with maximal image and utility.
 - Saving
 - Exif reading and error checking
 
+## Download
+
+[Stable releases](https://github.com/3top1a/r-liv/releases)
+
+[Unstable builds](https://github.com/3top1a/r-liv/actions)
+
+## Compiling from source
+
+```
+git clone https://github.com/3top1a/r-liv
+cd r-liv
+cargo build --release
+```
+
+the binary will be under `target/release/`
+
+## Usage
+
+**R-liv only supports opening an image, otherwise it will error**
+
+`r-liv image.png`
+
+On windows you can drag an image on the .exe to open it with R-liv.
+
 ## But why?
 
 Honestly, because JPEGView does not have Linux support.
