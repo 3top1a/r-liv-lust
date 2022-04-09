@@ -1,6 +1,9 @@
 # R-liv
 Rust Lean Image Viewer - Fast and configurable image viewer inspired by JPEGView by David Kleiner
 
+# THIS IS ARCHIVED
+I've started making a new and better version, with Vulkan and tokio. This project is for me to learn, remember?
+
 R-liv is meant to be a small, lean, fast and configurable image viewer inspired by [JPEGView by David Kleiner](https://sourceforge.net/projects/jpegview/).
 It's philosophy is similar - minimal GUI with maximal image and utility.
 
